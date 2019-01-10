@@ -37,7 +37,7 @@ public class Master {
 				;
 		//df.show();
 		
-		JavaRDD<Row> lines = spark.read().format("CSV").option("header", "true").load("files/temp.csv").javaRDD();
+		JavaRDD<Row> lines = spark.read().format("CSV").option("header", "true").load("temp.csv").javaRDD();
 		JavaPairRDD<String, Float> map = lines.mapToPair(s -> new Tuple2<String, Float>(s.getAs("VendorID"), Float.parseFloat(s.getAs("total_amount"))));
 		//Iterator it= map.collect().iterator();
 //		while(it.hasNext()) {
