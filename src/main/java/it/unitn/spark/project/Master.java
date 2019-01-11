@@ -38,20 +38,23 @@ public class Master {
 		//df.show();
 		
 		JavaRDD<Row> lines = spark.read().format("CSV").option("header", "true").load("temp.csv").javaRDD();
-		JavaPairRDD<String, Float> map = lines.mapToPair(s -> new Tuple2<String, Float>(s.getAs("VendorID"), Float.parseFloat(s.getAs("total_amount"))));
-		//Iterator it= map.collect().iterator();
+		JavaRDD<Row> result = lines.filter(a -> a.getAs("VendorID").equals("2"));
+		JavaRDD<Float> map = result.map(s -> Float.parseFloat(s.getAs("total_amount")));
+//		Iterator it= map.collect().iterator();
 //		while(it.hasNext()) {
 //			System.out.println(it.next().toString());
 //		}
+		
+		System.out.println(map.reduce((a,b) -> (a<b ? a : b)));
 		//(a._1==b._1)?(a._2>=b._2 ? a._2:b._2) :()
-		JavaPairRDD<String, Float> result = map.filter(a -> a._1.equals("1"));
+		//JavaPairRDD<String, Float> result = map.filter(a -> a._1.equals("1"));
 		//Tuple2<String, String> result2 = result.reduce((a,b) -> getMax(a,b));
 		//System.out.println(result2);
 //		Iterator it= result.collect().iterator();
 //		while(it.hasNext()) {
 //			System.out.println(it.next().toString());
 //		}
-		System.out.println(result.reduce((a,b) -> new Tuple2("res",(Float.max(a._2,b._2)))).toString());
+		//System.out.println(result.reduce((a,b) -> new Tuple2("res",(Float.max(a._2,b._2)))).toString());
 		
 		// Untyped Dataset Operationss
 		//df.printSchema();
