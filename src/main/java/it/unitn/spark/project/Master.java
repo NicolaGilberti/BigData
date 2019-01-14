@@ -15,15 +15,17 @@ import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.SparkSession.Builder;
 
+import it.unitn.spark.project.custom_classes.Time_intervals;
+import it.unitn.spark.project.datetime.DateTimeAnalysis;
 import scala.Tuple2;
 
 public class Master {
 	public static void main(String[] args) throws AnalysisException {
 		// SparkSession
 		Builder builder = new Builder().appName("SparkSQL Examples");
-		if (new File("/Users/").exists()) {
+		//if (new File("/Users/").exists()) {
 			builder.master("local");
-		}
+		//}
 		SparkSession spark = builder.getOrCreate();
 
 		// Obtain JavaSparkContext
@@ -38,14 +40,28 @@ public class Master {
 		//df.show();
 		
 		JavaRDD<Row> lines = spark.read().format("CSV").option("header", "true").load("temp.csv").javaRDD();
-		JavaRDD<Row> result = lines.filter(a -> a.getAs("VendorID").equals("2"));
-		JavaRDD<Float> map = result.map(s -> Float.parseFloat(s.getAs("total_amount")));
-//		Iterator it= map.collect().iterator();
+		//JavaRDD<Row> result = lines.filter(a -> a.getAs("VendorID").equals("2"));
+		//JavaRDD<Float> map = result.map(s -> Float.parseFloat(s.getAs("total_amount")));
+		//JavaRDD<Row> afternoon = DateTimeAnalysis.getDateTimeIntervals(lines, TIME_INTERVALS.AFTERNOON);
+		//JavaRDD<Row> afternoonCountPass = DateTimeAnalysis.getDateTimePerWeekEnd(lines);
+		//System.out.println(afternoonCountPass);
+		System.out.println("AVG:");
+		System.out.println(DateTimeAnalysis.getAveragePassenger(lines));
+
+		System.out.println("Through the day :");
+		System.out.println(DateTimeAnalysis.getAveragePassenger(DateTimeAnalysis.getDateTimeIntervals(lines, Time_intervals.MORNING)));
+		System.out.println(DateTimeAnalysis.getAveragePassenger(DateTimeAnalysis.getDateTimeIntervals(lines, Time_intervals.AFTERNOON)));
+		System.out.println(DateTimeAnalysis.getAveragePassenger(DateTimeAnalysis.getDateTimeIntervals(lines, Time_intervals.NIGHT)));
+
+		System.out.println("weekday/weekend:");
+		System.out.println(DateTimeAnalysis.getAveragePassenger(DateTimeAnalysis.getDateTimePerWeekDay(lines)));
+		System.out.println(DateTimeAnalysis.getAveragePassenger(DateTimeAnalysis.getDateTimePerWeekEnd(lines)));
+//		Iterator it= afternoonCountPass.collect().iterator();
 //		while(it.hasNext()) {
 //			System.out.println(it.next().toString());
 //		}
 		
-		System.out.println(map.reduce((a,b) -> (a<b ? a : b)));
+//		System.out.println(map.reduce((a,b) -> (a>b ? a : b)));
 		//(a._1==b._1)?(a._2>=b._2 ? a._2:b._2) :()
 		//JavaPairRDD<String, Float> result = map.filter(a -> a._1.equals("1"));
 		//Tuple2<String, String> result2 = result.reduce((a,b) -> getMax(a,b));
