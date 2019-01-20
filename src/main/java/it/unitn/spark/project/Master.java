@@ -1,6 +1,7 @@
 package it.unitn.spark.project;
 
 import java.io.File;
+import java.util.Date;
 import java.util.Iterator;
 
 import static org.apache.spark.sql.functions.col;
@@ -15,7 +16,7 @@ import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.SparkSession.Builder;
 
-import it.unitn.spark.project.custom_classes.Time_intervals;
+import it.unitn.spark.project.custom_classes.*;
 import it.unitn.spark.project.datetime.DateTimeAnalysis;
 import scala.Tuple2;
 
@@ -39,24 +40,60 @@ public class Master {
 				;
 		//df.show();
 		
-		JavaRDD<Row> lines = spark.read().format("CSV").option("header", "true").load("temp.csv").javaRDD();
-		//JavaRDD<Row> result = lines.filter(a -> a.getAs("VendorID").equals("2"));
-		//JavaRDD<Float> map = result.map(s -> Float.parseFloat(s.getAs("total_amount")));
-		//JavaRDD<Row> afternoon = DateTimeAnalysis.getDateTimeIntervals(lines, TIME_INTERVALS.AFTERNOON);
-		//JavaRDD<Row> afternoonCountPass = DateTimeAnalysis.getDateTimePerWeekEnd(lines);
-		//System.out.println(afternoonCountPass);
-		System.out.println("AVG:");
-		System.out.println(DateTimeAnalysis.getAveragePassenger(lines));
+		JavaRDD<Row> lines = spark.read().format("CSV").option("header", "true").load("temp.csv").javaRDD();//temp
+		/*****************/
+		/**Time analysis**/
+		/*****************/
+		long c = System.currentTimeMillis();
+		JavaPairRDD<Integer,Row> listofData = DateTimeAnalysis.getValuableDataForTimeIntervals(lines);
+		JavaPairRDD<Integer,Row> redListofData = DateTimeAnalysis.getAllAverages(listofData);
+		Iterator<Tuple2<Integer, Row>> it= redListofData.collect().iterator();
+		while(it.hasNext()) {
+			Tuple2<Integer, Row> tup  = it.next();
+			Time_intervals ti = Time_intervals.values()[tup._1];
+			String formattedRow ="";
+			MaxValueManager maxTrip = tup._2.getAs(0);
+			MaxValueManager maxExtra = tup._2.getAs(1);
+			MaxValueManager maxTip = tup._2.getAs(2);
+			MaxValueManager maxTotal = tup._2.getAs(3);
+			Float sumTrip = tup._2.getAs(4);
+			Float sumTip = tup._2.getAs(5);
+			Float sumTotal = tup._2.getAs(6);
+			Integer counter = tup._2.getAs(7);
+			formattedRow += "\t[maxTripDistance: " + maxTrip + "]\n";
+			formattedRow += "\t[maxExtraPaid: " + maxExtra + "]\n";
+			formattedRow += "\t[maxTipPaid: " + maxTip + "]\n";
+			formattedRow += "\t[maxTotalPaid: " + maxTotal + "]\n";
+			formattedRow += "\t[AvgTripDistance: " + ((double)sumTrip / counter*1.0) + "]\n";
+			formattedRow += "\t[AvgTipPaid: " + ((double)sumTip / counter*1.0) + "]\n";
+			formattedRow += "\t[AvgTotalPaid: " + ((double)sumTotal / counter*1.0) + "]\n";
+			formattedRow += "\t[RowEvaluated: " + counter + "]\n";
+			System.out.println("Time: " + ti + " results:\n" + formattedRow);
+		}
+		long d = System.currentTimeMillis();
+		long deltaT = (d-c);
+		System.out.println("exec time(h:min:sec:ms): " + deltaT / 1000 / 60 / 60 + ":" + (deltaT/1000/60) % 60 + ":" + (deltaT/1000) % 60 + ":" + deltaT % 1000);
+//		System.out.println("weekday/weekend:");
+//		System.out.println(DateTimeAnalysis.getAveragePassenger(weekDay));
+//		System.out.println(DateTimeAnalysis.getAveragePassenger(weekEnd));
+//		System.out.println("Extra check:");
+//		System.out.println(DateTimeAnalysis.getAveragePassenger(DateTimeAnalysis.getDateTimeIntervals(weekEnd,Time_intervals.NIGHT)));
+//		System.out.println(DateTimeAnalysis.getMaxPassengerCount(DateTimeAnalysis.getDateTimeIntervals(weekEnd,Time_intervals.MORNING)));
+//		System.out.println(DateTimeAnalysis.getMaxPassengerCount(DateTimeAnalysis.getDateTimeIntervals(weekEnd,Time_intervals.AFTERNOON)));
+//		System.out.println(DateTimeAnalysis.getMaxPassengerCount(DateTimeAnalysis.getDateTimeIntervals(weekEnd,Time_intervals.NIGHT)));
+//		System.out.println(DateTimeAnalysis.getMaxPassengerCount(DateTimeAnalysis.getDateTimeIntervals(weekDay,Time_intervals.MORNING)));
+//		System.out.println(DateTimeAnalysis.getMaxPassengerCount(DateTimeAnalysis.getDateTimeIntervals(weekDay,Time_intervals.AFTERNOON)));
+//		System.out.println(DateTimeAnalysis.getMaxPassengerCount(DateTimeAnalysis.getDateTimeIntervals(weekDay,Time_intervals.NIGHT)));
+//		String date = "2018-01-01 00:00:00";
+//		System.out.println(DateTimeAnalysis.getMaxPassengerCount(DateTimeAnalysis.getDateTimePerSpecificWeek(lines, date)));
+//		String dateFrom = "2018-01-01 00:00:00";
+//		String dateTo = "2018-01-02 00:00:00";
+//		System.out.println(DateTimeAnalysis.getMaxPassengerCount(DateTimeAnalysis.getDateTimePerSpecificRange(lines, dateFrom, dateTo)));
 
-		System.out.println("Through the day :");
-		System.out.println(DateTimeAnalysis.getAveragePassenger(DateTimeAnalysis.getDateTimeIntervals(lines, Time_intervals.MORNING)));
-		System.out.println(DateTimeAnalysis.getAveragePassenger(DateTimeAnalysis.getDateTimeIntervals(lines, Time_intervals.AFTERNOON)));
-		System.out.println(DateTimeAnalysis.getAveragePassenger(DateTimeAnalysis.getDateTimeIntervals(lines, Time_intervals.NIGHT)));
 
-		System.out.println("weekday/weekend:");
-		System.out.println(DateTimeAnalysis.getAveragePassenger(DateTimeAnalysis.getDateTimePerWeekDay(lines)));
-		System.out.println(DateTimeAnalysis.getAveragePassenger(DateTimeAnalysis.getDateTimePerWeekEnd(lines)));
-//		Iterator it= afternoonCountPass.collect().iterator();
+
+		/** trials **/
+//		Iterator it= _.collect().iterator();
 //		while(it.hasNext()) {
 //			System.out.println(it.next().toString());
 //		}
