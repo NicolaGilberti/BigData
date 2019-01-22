@@ -40,57 +40,116 @@ public class Master {
 				;
 		//df.show();
 		
-		JavaRDD<Row> lines = spark.read().format("CSV").option("header", "true").load("temp.csv").javaRDD();//temp
+		JavaRDD<Row> lines = spark.read().format("CSV").option("header", "true").load("yellow_tripdata_2018-01.csv").javaRDD();//temp
 		/*****************/
 		/**Time analysis**/
 		/*****************/
-		long c = System.currentTimeMillis();
-		JavaPairRDD<Integer,Row> listofData = DateTimeAnalysis.getValuableDataForTimeIntervals(lines);
-		JavaPairRDD<Integer,Row> redListofData = DateTimeAnalysis.getAllAverages(listofData);
-		Iterator<Tuple2<Integer, Row>> it= redListofData.collect().iterator();
-		while(it.hasNext()) {
-			Tuple2<Integer, Row> tup  = it.next();
-			Time_intervals ti = Time_intervals.values()[tup._1];
+//		long a = System.currentTimeMillis();
+//		JavaPairRDD<Integer,Row> listOfTimeIntervalsData = DateTimeAnalysis.getValuableDataForTimeIntervals(lines);
+//		JavaPairRDD<Integer,Row> reducedListOfTimeIntervalsData = DateTimeAnalysis.getAllAverages(listOfTimeIntervalsData);
+//		Iterator<Tuple2<Integer, Row>> timeIntervalsIt= reducedListOfTimeIntervalsData.collect().iterator();
+//		while(timeIntervalsIt.hasNext()) {
+//			Tuple2<Integer, Row> tup  = timeIntervalsIt.next();
+//			Time_intervals ti = Time_intervals.values()[tup._1];
+//			String formattedRow ="";
+//			MaxValueManager maxPassengerCount = tup._2.getAs(0);
+//			MaxValueManager maxTrip = tup._2.getAs(1);
+//			MaxValueManager maxExtra = tup._2.getAs(2);
+//			MaxValueManager maxTip = tup._2.getAs(3);
+//			MaxValueManager maxTotal = tup._2.getAs(4);
+//			Integer passengerCounter = tup._2.getAs(5);
+//			Float sumTrip = tup._2.getAs(6);
+//			Float sumTip = tup._2.getAs(7);
+//			Float sumTotal = tup._2.getAs(8);
+//			Integer counter = tup._2.getAs(9);
+//			formattedRow += "\tMaxPassengerCount: " + maxPassengerCount + "\n";
+//			formattedRow += "\tMaxTripDistance: " + maxTrip + "\n";
+//			formattedRow += "\tMaxExtraPaid: " + maxExtra + "\n";
+//			formattedRow += "\tMaxTipPaid: " + maxTip + "\n";
+//			formattedRow += "\tMaxTotalPaid: " + maxTotal + "\n";
+//			formattedRow += "\tAvgPassengerCounter: " + ((double)passengerCounter / counter*1.0) + "\n";
+//			formattedRow += "\tAvgTripDistance: " + ((double)sumTrip / counter*1.0) + "\n";
+//			formattedRow += "\tAvgTipPaid: " + ((double)sumTip / counter*1.0) + "\n";
+//			formattedRow += "\tAvgTotalPaid: " + ((double)sumTotal / counter*1.0) + "\n";
+//			formattedRow += "\tRowEvaluated: " + counter + "\n";
+//			System.out.println(ti.getClass().getSimpleName() + ": " + ti + " results:\n" + formattedRow);
+//		}
+//		long b = System.currentTimeMillis();
+//		long deltaAB = (b-a);
+//		System.out.println("exec time(h:min:sec:ms): " + deltaAB / 1000 / 60 / 60 + ":" + (deltaAB/1000/60) % 60 + ":" + (deltaAB/1000) % 60 + ":" + deltaAB % 1000 + "\n");
+
+//		long c = System.currentTimeMillis();
+//		JavaPairRDD<Integer,Row> listOfWeekendWeekdaysData = DateTimeAnalysis.getValuableDataForWeekendWeekdays(lines);
+//		JavaPairRDD<Integer,Row> reducedListOfWeekendWeekdaysData = DateTimeAnalysis.getAllAverages(listOfWeekendWeekdaysData);
+//		Iterator<Tuple2<Integer, Row>> weekendWeekdaysIt= reducedListOfWeekendWeekdaysData.collect().iterator();
+//		while(weekendWeekdaysIt.hasNext()) {
+//			Tuple2<Integer, Row> tup  = weekendWeekdaysIt.next();
+//			DayOfWeek ti = DayOfWeek.values()[tup._1];
+//			String formattedRow ="";
+//			MaxValueManager maxPassengerCount = tup._2.getAs(0);
+//			MaxValueManager maxTrip = tup._2.getAs(1);
+//			MaxValueManager maxExtra = tup._2.getAs(2);
+//			MaxValueManager maxTip = tup._2.getAs(3);
+//			MaxValueManager maxTotal = tup._2.getAs(4);
+//			Integer passengerCounter = tup._2.getAs(5);
+//			Float sumTrip = tup._2.getAs(6);
+//			Float sumTip = tup._2.getAs(7);
+//			Float sumTotal = tup._2.getAs(8);
+//			Integer counter = tup._2.getAs(9);
+//			formattedRow += "\tMaxPassengerCount: " + maxPassengerCount + "\n";
+//			formattedRow += "\tMaxTripDistance: " + maxTrip + "\n";
+//			formattedRow += "\tMaxExtraPaid: " + maxExtra + "\n";
+//			formattedRow += "\tMaxTipPaid: " + maxTip + "\n";
+//			formattedRow += "\tMaxTotalPaid: " + maxTotal + "\n";
+//			formattedRow += "\tAvgPassengerCounter: " + ((double)passengerCounter / counter*1.0) + "\n";
+//			formattedRow += "\tAvgTripDistance: " + ((double)sumTrip / counter*1.0) + "\n";
+//			formattedRow += "\tAvgTipPaid: " + ((double)sumTip / counter*1.0) + "\n";
+//			formattedRow += "\tAvgTotalPaid: " + ((double)sumTotal / counter*1.0) + "\n";
+//			formattedRow += "\tRowEvaluated: " + counter + "\n";
+//			System.out.println(ti.getClass().getSimpleName() + ": " + ti + " results:\n" + formattedRow);
+//		}
+//		long d = System.currentTimeMillis();
+//		long deltaCD = (d-c);
+//		System.out.println("exec time(h:min:sec:ms): " + deltaTCD / 1000 / 60 / 60 + ":" + (deltaCD/1000/60) % 60 + ":" + (deltaCD/1000) % 60 + ":" + deltaCD % 1000 + "\n");
+
+		long e = System.currentTimeMillis();
+		JavaPairRDD<Integer,Row> listOfWWTIData = DateTimeAnalysis.getValuableDataForWWTI(lines);
+		JavaPairRDD<Integer,Row> reducedListOfWWTIData = DateTimeAnalysis.getAllAverages(listOfWWTIData);
+		Iterator<Tuple2<Integer, Row>> WWTIIt= reducedListOfWWTIData.collect().iterator();
+		while(WWTIIt.hasNext()) {
+			Tuple2<Integer, Row> tup  = WWTIIt.next();
+			int key = tup._1;
+			String keyS = "";
+			DayOfWeek ww = DayOfWeek.values()[key/10];
+			Time_intervals ti = Time_intervals.values()[key%10];
+			keyS += ww.getClass().getSimpleName() + ": " + ww + " ";
+			keyS += ti.getClass().getSimpleName() + ": " + ti  + "\nResults:\n" ;
 			String formattedRow ="";
-			MaxValueManager maxTrip = tup._2.getAs(0);
-			MaxValueManager maxExtra = tup._2.getAs(1);
-			MaxValueManager maxTip = tup._2.getAs(2);
-			MaxValueManager maxTotal = tup._2.getAs(3);
-			Float sumTrip = tup._2.getAs(4);
-			Float sumTip = tup._2.getAs(5);
-			Float sumTotal = tup._2.getAs(6);
-			Integer counter = tup._2.getAs(7);
-			formattedRow += "\t[maxTripDistance: " + maxTrip + "]\n";
-			formattedRow += "\t[maxExtraPaid: " + maxExtra + "]\n";
-			formattedRow += "\t[maxTipPaid: " + maxTip + "]\n";
-			formattedRow += "\t[maxTotalPaid: " + maxTotal + "]\n";
-			formattedRow += "\t[AvgTripDistance: " + ((double)sumTrip / counter*1.0) + "]\n";
-			formattedRow += "\t[AvgTipPaid: " + ((double)sumTip / counter*1.0) + "]\n";
-			formattedRow += "\t[AvgTotalPaid: " + ((double)sumTotal / counter*1.0) + "]\n";
-			formattedRow += "\t[RowEvaluated: " + counter + "]\n";
-			System.out.println("Time: " + ti + " results:\n" + formattedRow);
+			MaxValueManager maxPassengerCount = tup._2.getAs(0);
+			MaxValueManager maxTrip = tup._2.getAs(1);
+			MaxValueManager maxExtra = tup._2.getAs(2);
+			MaxValueManager maxTip = tup._2.getAs(3);
+			MaxValueManager maxTotal = tup._2.getAs(4);
+			Integer passengerCounter = tup._2.getAs(5);
+			Float sumTrip = tup._2.getAs(6);
+			Float sumTip = tup._2.getAs(7);
+			Float sumTotal = tup._2.getAs(8);
+			Integer counter = tup._2.getAs(9);
+			formattedRow += "\tMaxPassengerCount: " + maxPassengerCount + "\n";
+			formattedRow += "\tMaxTripDistance: " + maxTrip + "\n";
+			formattedRow += "\tMaxExtraPaid: " + maxExtra + "\n";
+			formattedRow += "\tMaxTipPaid: " + maxTip + "\n";
+			formattedRow += "\tMaxTotalPaid: " + maxTotal + "\n";
+			formattedRow += "\tAvgPassengerCounter: " + ((double)passengerCounter / counter*1.0) + "\n";
+			formattedRow += "\tAvgTripDistance: " + ((double)sumTrip / counter*1.0) + "\n";
+			formattedRow += "\tAvgTipPaid: " + ((double)sumTip / counter*1.0) + "\n";
+			formattedRow += "\tAvgTotalPaid: " + ((double)sumTotal / counter*1.0) + "\n";
+			formattedRow += "\tRowEvaluated: " + counter + "\n";
+			System.out.println(keyS + formattedRow);
 		}
-		long d = System.currentTimeMillis();
-		long deltaT = (d-c);
-		System.out.println("exec time(h:min:sec:ms): " + deltaT / 1000 / 60 / 60 + ":" + (deltaT/1000/60) % 60 + ":" + (deltaT/1000) % 60 + ":" + deltaT % 1000);
-//		System.out.println("weekday/weekend:");
-//		System.out.println(DateTimeAnalysis.getAveragePassenger(weekDay));
-//		System.out.println(DateTimeAnalysis.getAveragePassenger(weekEnd));
-//		System.out.println("Extra check:");
-//		System.out.println(DateTimeAnalysis.getAveragePassenger(DateTimeAnalysis.getDateTimeIntervals(weekEnd,Time_intervals.NIGHT)));
-//		System.out.println(DateTimeAnalysis.getMaxPassengerCount(DateTimeAnalysis.getDateTimeIntervals(weekEnd,Time_intervals.MORNING)));
-//		System.out.println(DateTimeAnalysis.getMaxPassengerCount(DateTimeAnalysis.getDateTimeIntervals(weekEnd,Time_intervals.AFTERNOON)));
-//		System.out.println(DateTimeAnalysis.getMaxPassengerCount(DateTimeAnalysis.getDateTimeIntervals(weekEnd,Time_intervals.NIGHT)));
-//		System.out.println(DateTimeAnalysis.getMaxPassengerCount(DateTimeAnalysis.getDateTimeIntervals(weekDay,Time_intervals.MORNING)));
-//		System.out.println(DateTimeAnalysis.getMaxPassengerCount(DateTimeAnalysis.getDateTimeIntervals(weekDay,Time_intervals.AFTERNOON)));
-//		System.out.println(DateTimeAnalysis.getMaxPassengerCount(DateTimeAnalysis.getDateTimeIntervals(weekDay,Time_intervals.NIGHT)));
-//		String date = "2018-01-01 00:00:00";
-//		System.out.println(DateTimeAnalysis.getMaxPassengerCount(DateTimeAnalysis.getDateTimePerSpecificWeek(lines, date)));
-//		String dateFrom = "2018-01-01 00:00:00";
-//		String dateTo = "2018-01-02 00:00:00";
-//		System.out.println(DateTimeAnalysis.getMaxPassengerCount(DateTimeAnalysis.getDateTimePerSpecificRange(lines, dateFrom, dateTo)));
-
-
+		long f = System.currentTimeMillis();
+		long deltaEF = (f-e);
+		System.out.println("exec time(h:min:sec:ms): " + deltaEF / 1000 / 60 / 60 + ":" + (deltaEF/1000/60) % 60 + ":" + (deltaEF/1000) % 60 + ":" + deltaEF % 1000 + "\n");
 
 		/** trials **/
 //		Iterator it= _.collect().iterator();

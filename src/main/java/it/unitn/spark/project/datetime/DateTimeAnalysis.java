@@ -16,25 +16,19 @@ import scala.Tuple2;
 public class DateTimeAnalysis {
 	private static Calendar calendar = Calendar.getInstance();
 	
-//	//test mapwith keys
-//	public static void getAvgPerIntervals(JavaRDD<Row> fullList) {
-//		JavaPairRDD<Integer, Integer> listWithKeys = fullList.mapToPair(a -> mapp(a,1));
-//		JavaPairRDD<Integer, Integer> sumByKey = listWithKeys.reduceByKey((a,b) -> a+b);
-//		//troviamo il count per ogni key
-//		JavaPairRDD<Integer, Integer> listWithKeys2 = fullList.mapToPair(a -> mapp(a,2));
-//		JavaPairRDD<Integer, Integer> countByKey = listWithKeys2.reduceByKey((a,b) -> a+b);
-//		Iterator<Tuple2<Integer, Integer>> it = sumByKey.toLocalIterator();
-//		Iterator<Tuple2<Integer, Integer>> it2 = countByKey.toLocalIterator();
-//		while(it.hasNext() && it2.hasNext()) {
-//			Tuple2<Integer, Integer> temp = it.next();
-//			Tuple2<Integer, Integer> temp2 = it2.next();
-//			System.out.println("Key: " + Time_intervals.values()[temp._1] + " value: " + temp._2*1.0/temp2._2*1.0);
-//		}
-//	}
-	
 	public static JavaPairRDD<Integer,Row> getValuableDataForTimeIntervals(JavaRDD<Row> fullList){
 		JavaPairRDD<Integer,Row> listWithKey = null;
-		listWithKey = fullList.mapToPair(a -> mappingEverything(a));
+		listWithKey = fullList.mapToPair(a -> mapDataForTimeIntervals(a));
+		return listWithKey;
+	}
+	public static JavaPairRDD<Integer,Row> getValuableDataForWeekendWeekdays(JavaRDD<Row> fullList){
+		JavaPairRDD<Integer,Row> listWithKey = null;
+		listWithKey = fullList.mapToPair(a -> mapDataForWeekendWeekdays(a));
+		return listWithKey;
+	}
+	public static JavaPairRDD<Integer,Row> getValuableDataForWWTI(JavaRDD<Row> fullList){
+		JavaPairRDD<Integer,Row> listWithKey = null;
+		listWithKey = fullList.mapToPair(a -> mapDataForWWTI(a));
 		return listWithKey;
 	}
 	public static JavaPairRDD<Integer, Row> getAllAverages(JavaPairRDD<Integer,Row> fullList){
@@ -111,10 +105,6 @@ public class DateTimeAnalysis {
 		JavaRDD<Row> list = fullList.filter(a -> isRowDateInSpecificRange(a,fromDate,toDate));
 		return list;
 	}
-	
-	
-	
-	
 	/**
 	 * return the Counter of the passenger for the given list
 	 * @param fullList
@@ -233,7 +223,6 @@ public class DateTimeAnalysis {
 		targetCalendar.setTime(date1);
 		int targetWeek = targetCalendar.get(Calendar.WEEK_OF_YEAR);
 		int targetYear = targetCalendar.get(Calendar.YEAR);
-		//System.out.println("target: " + targetWeek + " " + targetYear + " input: " + week + " " +year);
 		return week == targetWeek && year == targetYear;
 	}
 	
@@ -267,99 +256,77 @@ public class DateTimeAnalysis {
 	/******************/
 	/**		Maps	 **/
 	/******************/
-//	//opt -> ==2 to count (put values to 1)
-//	public static Tuple2 mapp(Row a,int opt) throws ParseException{
-//		Integer key =0;
-//		Integer value = 1;
-//		Date toCheck = getDate(a.getAs("tpep_pickup_datetime"));
-//		for(int i=0; i< Time_intervals.values().length; i++) {
-//			Time_intervals t = Time_intervals.values()[i];
-//			if(t.getStartTime().getHours() > t.getEndTime().getHours()) {
-//				if(toCheck.getHours() >= t.getStartTime().getHours() || 
-//						toCheck.getHours() < t.getEndTime().getHours()) {
-//					key = i;
-//					value = Integer.parseInt(a.getAs("passenger_count"));
-//				}
-//			}else {
-//				if(toCheck.getHours() >= t.getStartTime().getHours() && 
-//						toCheck.getHours() < t.getEndTime().getHours()) {
-//					key = i;
-//					value = Integer.parseInt(a.getAs("passenger_count"));
-//				}
-//			}
-//		}
-//		if(opt==2) {
-//			value=1;
-//		}
-//		return new Tuple2(key,value);
-//	}
 	@SuppressWarnings("deprecation")
-	public static Tuple2<Integer,Row> mappingEverything(Row a) throws ParseException{
+	public static Tuple2<Integer,Row> mapDataForTimeIntervals(Row a) throws ParseException{
 		Integer key =0;
 		Row value;
 		Date toCheck = getDate(a.getAs("tpep_pickup_datetime"));
 		for(int i=0; i< Time_intervals.values().length; i++) {
-			Time_intervals t = Time_intervals.values()[i];
-			if(t.getStartTime().getHours() > t.getEndTime().getHours()) {
-				if(toCheck.getHours() >= t.getStartTime().getHours() || 
-						toCheck.getHours() < t.getEndTime().getHours()) {
-					key = i;
-				}
-			}else {
-				if(toCheck.getHours() >= t.getStartTime().getHours() && 
-						toCheck.getHours() < t.getEndTime().getHours()) {
-					key = i;
-				}
+			if(interval(a, Time_intervals.values()[i])) {
+				key = i;
 			}
 		}
-		value = RowFactory.create(
-				new MaxValueManager(new Tuple2<Float,Integer>(Float.parseFloat(a.getAs("trip_distance")),1)),
-				new MaxValueManager(new Tuple2<Float,Integer>(Float.parseFloat(a.getAs("extra")),1)),
-				new MaxValueManager(new Tuple2<Float,Integer>(Float.parseFloat(a.getAs("tip_amount")),1)),
-				new MaxValueManager(new Tuple2<Float,Integer>(Float.parseFloat(a.getAs("total_amount")),1)),
-				Float.parseFloat(a.getAs("trip_distance")),
-				Float.parseFloat(a.getAs("tip_amount")),
-				Float.parseFloat(a.getAs("total_amount")),
-				1
-				);
+		value = getFormattedRow(a);
 		return new Tuple2<Integer, Row>(key,value);
 	}
 	
+	public static Tuple2<Integer,Row> mapDataForWeekendWeekdays(Row a) throws ParseException{
+		int key = 0;
+		Row value = null;
+		if(weekEnd(a)) {
+			key = DayOfWeek.WEEKEND.ordinal();
+		}else {
+			key = DayOfWeek.WEEKDAY.ordinal();
+		}
+		value = getFormattedRow(a);
+		return new Tuple2<Integer,Row>(key,value);
+	}
 	
+	public static Tuple2<Integer,Row> mapDataForWWTI(Row a) throws ParseException{
+		Integer keyPt1 = 0;
+		Integer keyPt2 = 0;
+		Row value = null;
+		if(weekEnd(a)) {
+			keyPt1 = DayOfWeek.WEEKEND.ordinal();
+		}else {
+			keyPt1 = DayOfWeek.WEEKDAY.ordinal();
+		}
+		for(int i=0; i< Time_intervals.values().length; i++) {
+			if(interval(a, Time_intervals.values()[i])) {
+				keyPt2 = i;
+			}
+		}
+		String keyS = keyPt1 + "" + keyPt2;
+		int key = Integer.parseInt(keyS); 
+		value = getFormattedRow(a);
+		return new Tuple2<Integer,Row>(key,value);
+	}
 	/*********************/
 	/**		Reduces		**/
 	/*********************/
 	
 	private static Row counts(Row a, Row b) {
 		Row res = null;
-//		Tuple2<Float,Integer> a0 = a.getAs(0);
-//		Tuple2<Float,Integer> a1 = a.getAs(1);
-//		Tuple2<Float,Integer> a2 = a.getAs(2);
-//		Tuple2<Float,Integer> a3 = a.getAs(3);
-//		Tuple2<Float,Integer> b0 = b.getAs(0);
-//		Tuple2<Float,Integer> b1 = b.getAs(1);
-//		Tuple2<Float,Integer> b2 = b.getAs(2);
-//		Tuple2<Float,Integer> b3 = b.getAs(3);
-//		Tuple2<Float,Integer> elem0 = a0._1>b0._1?a0:(a0._1<b0._1?b0:new Tuple2<Float,Integer>(a0._1,a0._2+b0._2));
-//		Tuple2<Float,Integer> elem1 = a1._1>b1._1?a1:(a1._1<b1._1?b1:new Tuple2<Float,Integer>(a1._1,a1._2+b1._2));
-//		Tuple2<Float,Integer> elem2 = a2._1>b2._1?a2:(a2._1<b2._1?b2:new Tuple2<Float,Integer>(a2._1,a2._2+b2._2));
-//		Tuple2<Float,Integer> elem3 = a3._1>b3._1?a3:(a3._1<b3._1?b3:new Tuple2<Float,Integer>(a3._1,a3._2+b3._2));
 		MaxValueManager a0 = a.getAs(0);
 		MaxValueManager a1 = a.getAs(1);
 		MaxValueManager a2 = a.getAs(2);
 		MaxValueManager a3 = a.getAs(3);
+		MaxValueManager a4 = a.getAs(4);
 		MaxValueManager b0 = b.getAs(0);
 		MaxValueManager b1 = b.getAs(1);
 		MaxValueManager b2 = b.getAs(2);
 		MaxValueManager b3 = b.getAs(3);
+		MaxValueManager b4 = b.getAs(4);
 		MaxValueManager elem0 = a0.setValues(b0);
 		MaxValueManager elem1 = a1.setValues(b1);
 		MaxValueManager elem2 = a2.setValues(b2);
 		MaxValueManager elem3 = a3.setValues(b3);
-		Float elem4 = (float)a.getAs(4) + (float)b.getAs(4);
-		Float elem5 = (float)a.getAs(5) + (float)b.getAs(5);
+		MaxValueManager elem4 = a4.setValues(b4);
+		Integer elem5 = (int)a.getAs(5) + (int)b.getAs(5);
 		Float elem6 = (float)a.getAs(6) + (float)b.getAs(6);
-		Integer elem7 = (int)a.getAs(7) + (int)b.getAs(7);
+		Float elem7 = (float)a.getAs(7) + (float)b.getAs(7);
+		Float elem8 = (float)a.getAs(8) + (float)b.getAs(8);
+		Integer elem9 = (int)a.getAs(9) + (int)b.getAs(9);
 		res = RowFactory.create(elem0,
 				elem1,
 				elem2,
@@ -367,7 +334,9 @@ public class DateTimeAnalysis {
 				elem4,
 				elem5,
 				elem6,
-				elem7
+				elem7,
+				elem8,
+				elem9
 				);
 		
 		return res;
@@ -380,5 +349,19 @@ public class DateTimeAnalysis {
 	private static Date getDate(String dateInString) throws ParseException {
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 		return formatter.parse(dateInString);
+	}
+	private static Row getFormattedRow(Row a){
+		return RowFactory.create(
+				new MaxValueManager(new Tuple2<Float,Integer>(Float.parseFloat(a.getAs("passenger_count")),1)),
+				new MaxValueManager(new Tuple2<Float,Integer>(Float.parseFloat(a.getAs("trip_distance")),1)),
+				new MaxValueManager(new Tuple2<Float,Integer>(Float.parseFloat(a.getAs("extra")),1)),
+				new MaxValueManager(new Tuple2<Float,Integer>(Float.parseFloat(a.getAs("tip_amount")),1)),
+				new MaxValueManager(new Tuple2<Float,Integer>(Float.parseFloat(a.getAs("total_amount")),1)),
+				Integer.parseInt(a.getAs("passenger_count")),
+				Float.parseFloat(a.getAs("trip_distance")),
+				Float.parseFloat(a.getAs("tip_amount")),
+				Float.parseFloat(a.getAs("total_amount")),
+				1
+				);
 	}
 }

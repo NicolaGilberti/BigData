@@ -4,7 +4,7 @@ import java.util.Date;
 
 public enum Time_intervals {
 	MORNING(4, 12), AFTERNOON(12, 20), NIGHT(20, 4);
-
+	//MORNINGPT1(4, 8), MORNINGPT2(8, 12), AFTERNOONPT1(12, 16), AFTERNOONPT2(16, 20), NIGHTPT1(20, 24), NIGHTPT2(0, 4);
     private Date startTime;
     private Date endTime;
 

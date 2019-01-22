@@ -67,16 +67,20 @@ public class MaxValueManager implements Serializable{
             }else if (Float.compare(arr._1, this.getThird()._1)==0){
             	this.setThird(new Tuple2<Float, Integer>(this.getThird()._1, Integer.sum(arr._2, this.getThird()._2)));
             }
-			this.balanceToThree();
+			this.balanceToX(3);
 		}
 		return this;
 	}
-	//to maintain only 3 values
-	private void balanceToThree() {
-		if(this.maxValues.size()>3) {
+	/**
+	 * to maintain only X values
+	 * inside the maxManager
+	 * @param X
+	 */
+	private void balanceToX(int X) {
+		if(this.maxValues.size()>X) {
 			int elemToRem = this.maxValues.size();
-			for(int j=3; j<elemToRem; j++) {
-				this.maxValues.remove(3);
+			for(int j=X; j<elemToRem; j++) {
+				this.maxValues.remove(X);
 			}
 		}
 	}
