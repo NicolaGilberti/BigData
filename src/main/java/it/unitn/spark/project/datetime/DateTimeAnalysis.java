@@ -2,37 +2,196 @@ package it.unitn.spark.project.datetime;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Iterator;
 
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.RowFactory;
 
-import it.unitn.spark.project.custom_classes.*;
+import it.unitn.spark.project.custom_classes.Time_intervals;
+import it.unitn.spark.project.custom_classes.DayOfWeek;
+import it.unitn.spark.project.custom_classes.MaxValueManager;
+import it.unitn.spark.project.custom_classes.Payment_type;
+import it.unitn.spark.project.custom_classes.TaxyZone;
 import scala.Tuple2;
 
 public class DateTimeAnalysis {
 	private static Calendar calendar = Calendar.getInstance();
-	
+	private static TaxyZone taxyZone = null;
+	/**
+	 * 
+	 * @param fullList
+	 * @return
+	 */
 	public static JavaPairRDD<Integer,Row> getValuableDataForTimeIntervals(JavaRDD<Row> fullList){
 		JavaPairRDD<Integer,Row> listWithKey = null;
 		listWithKey = fullList.mapToPair(a -> mapDataForTimeIntervals(a));
 		return listWithKey;
 	}
+	/**
+	 * 
+	 * @param fullList
+	 * @return
+	 */
 	public static JavaPairRDD<Integer,Row> getValuableDataForWeekendWeekdays(JavaRDD<Row> fullList){
 		JavaPairRDD<Integer,Row> listWithKey = null;
 		listWithKey = fullList.mapToPair(a -> mapDataForWeekendWeekdays(a));
 		return listWithKey;
 	}
+	/**
+	 * Weekday-Weekend & Time intervals
+	 * @param fullList
+	 * @return
+	 */
 	public static JavaPairRDD<Integer,Row> getValuableDataForWWTI(JavaRDD<Row> fullList){
 		JavaPairRDD<Integer,Row> listWithKey = null;
 		listWithKey = fullList.mapToPair(a -> mapDataForWWTI(a));
 		return listWithKey;
 	}
-	public static JavaPairRDD<Integer, Row> getAllAverages(JavaPairRDD<Integer,Row> fullList){
+	/**
+	 * Time-Intervals & Payment types
+	 * @param fullList
+	 * @return
+	 */
+	public static JavaPairRDD<Integer,Row> getValuableDataForTIPT(JavaRDD<Row> fullList){
+		JavaPairRDD<Integer,Row> listWithKey = null;
+		listWithKey = fullList.mapToPair(a -> mapDataForTIPT(a));
+		return listWithKey;
+	}
+	/**
+	 * Weekday-Weekend & Payment types
+	 * @param fullList
+	 * @return
+	 */
+	public static JavaPairRDD<Integer,Row> getValuableDataForWWPT(JavaRDD<Row> fullList){
+		JavaPairRDD<Integer,Row> listWithKey = null;
+		listWithKey = fullList.mapToPair(a -> mapDataForWWPT(a));
+		return listWithKey;
+	}
+	/**
+	 * Weekday-Weekend & Time-Intervals & Payment types
+	 * @param fullList
+	 * @return
+	 */
+	public static JavaPairRDD<Integer,Row> getValuableDataForWWTIPT(JavaRDD<Row> fullList){
+		JavaPairRDD<Integer,Row> listWithKey = null;
+		listWithKey = fullList.mapToPair(a -> mapDataForWWTIPT(a));
+		return listWithKey;
+	}
+	/**
+	 * Weekday-Weekend & PU and DO in same/different borough
+	 * @param fullList
+	 * @return
+	 */
+	public static JavaPairRDD<Integer,Row> getValuableDataForWWB(JavaRDD<Row> fullList){
+		JavaPairRDD<Integer,Row> listWithKey = null;
+		listWithKey = fullList.mapToPair(a -> mapDataForWWB(a));
+		return listWithKey;
+	}
+	/**
+	 * Weekday-Weekend & PU 
+	 * @param fullList
+	 * @return
+	 */
+	public static JavaPairRDD<Integer,Row> getValuableDataForWWPU(JavaRDD<Row> fullList){
+		JavaPairRDD<Integer,Row> listWithKey = null;
+		listWithKey = fullList.mapToPair(a -> mapDataForWWPU(a));
+		return listWithKey;
+	}
+	/**
+	 * Weekday-Weekend & DO 
+	 * @param fullList
+	 * @return
+	 */
+	public static JavaPairRDD<Integer,Row> getValuableDataForWWDO(JavaRDD<Row> fullList){
+		JavaPairRDD<Integer,Row> listWithKey = null;
+		listWithKey = fullList.mapToPair(a -> mapDataForWWDO(a));
+		return listWithKey;
+	}
+	/**
+	 * Weekday-Weekend & PU Borough
+	 * @param fullList
+	 * @return
+	 */
+	public static JavaPairRDD<Integer,Row> getValuableDataForWWPUB(JavaRDD<Row> fullList){
+		JavaPairRDD<Integer,Row> listWithKey = null;
+		listWithKey = fullList.mapToPair(a -> mapDataForWWPUB(a));
+		return listWithKey;
+	}
+	/**
+	 * Weekday-Weekend & DO Borough 
+	 * @param fullList
+	 * @return
+	 */
+	public static JavaPairRDD<Integer,Row> getValuableDataForWWDOB(JavaRDD<Row> fullList){
+		JavaPairRDD<Integer,Row> listWithKey = null;
+		listWithKey = fullList.mapToPair(a -> mapDataForWWDOB(a));
+		return listWithKey;
+	}
+	/**
+	 * Time-Intervals & PU and DO in same/different borough
+	 * @param fullList
+	 * @return
+	 */
+	public static JavaPairRDD<Integer,Row> getValuableDataForTIB(JavaRDD<Row> fullList){
+		JavaPairRDD<Integer,Row> listWithKey = null;
+		listWithKey = fullList.mapToPair(a -> mapDataForTIB(a));
+		return listWithKey;
+	}
+	/**
+	 * Time-Intervals & PU 
+	 * @param fullList
+	 * @return
+	 */
+	public static JavaPairRDD<Integer,Row> getValuableDataForTIPU(JavaRDD<Row> fullList){
+		JavaPairRDD<Integer,Row> listWithKey = null;
+		listWithKey = fullList.mapToPair(a -> mapDataForTIPU(a));
+		return listWithKey;
+	}
+	/**
+	 * Time-Intervals & DO 
+	 * @param fullList
+	 * @return
+	 */
+	public static JavaPairRDD<Integer,Row> getValuableDataForTIDO(JavaRDD<Row> fullList){
+		JavaPairRDD<Integer,Row> listWithKey = null;
+		listWithKey = fullList.mapToPair(a -> mapDataForTIDO(a));
+		return listWithKey;
+	}
+	/**
+	 * Time-Intervals & PU Borough
+	 * @param fullList
+	 * @return
+	 */
+	public static JavaPairRDD<Integer,Row> getValuableDataForTIPUB(JavaRDD<Row> fullList){
+		JavaPairRDD<Integer,Row> listWithKey = null;
+		listWithKey = fullList.mapToPair(a -> mapDataForTIPUB(a));
+		return listWithKey;
+	}
+	/**
+	 * Time-Intervals & DO Borough 
+	 * @param fullList
+	 * @return
+	 */
+	public static JavaPairRDD<Integer,Row> getValuableDataForTIDOB(JavaRDD<Row> fullList){
+		JavaPairRDD<Integer,Row> listWithKey = null;
+		listWithKey = fullList.mapToPair(a -> mapDataForTIDOB(a));
+		return listWithKey;
+	}
+	/**
+	 * 
+	 * @param fullList
+	 * @return
+	 */
+	public static JavaPairRDD<Integer, Row> getAllReducedData(JavaPairRDD<Integer,Row> fullList){
 		JavaPairRDD<Integer,Row> listWithAvg = null;
+		if(fullList.isEmpty()) {
+			throw new java.lang.RuntimeException("Empty RDD");
+		}
 		listWithAvg = fullList.reduceByKey((a,b) -> counts(a,b));
 		return listWithAvg;
 	}
@@ -253,21 +412,25 @@ public class DateTimeAnalysis {
 		}
 		return false;
 	}
+	public static boolean paymentType(Row a, Payment_type pt) {
+		if(a.getAs("payment_type").equals(pt.getRealTag())) {
+			return true;
+		}
+		return false;
+	}
 	/******************/
 	/**		Maps	 **/
 	/******************/
-	@SuppressWarnings("deprecation")
 	public static Tuple2<Integer,Row> mapDataForTimeIntervals(Row a) throws ParseException{
 		Integer key =0;
 		Row value;
-		Date toCheck = getDate(a.getAs("tpep_pickup_datetime"));
 		for(int i=0; i< Time_intervals.values().length; i++) {
 			if(interval(a, Time_intervals.values()[i])) {
 				key = i;
 			}
 		}
 		value = getFormattedRow(a);
-		return new Tuple2<Integer, Row>(key,value);
+		return new Tuple2<Integer, Row>((key+1),value);
 	}
 	
 	public static Tuple2<Integer,Row> mapDataForWeekendWeekdays(Row a) throws ParseException{
@@ -279,7 +442,7 @@ public class DateTimeAnalysis {
 			key = DayOfWeek.WEEKDAY.ordinal();
 		}
 		value = getFormattedRow(a);
-		return new Tuple2<Integer,Row>(key,value);
+		return new Tuple2<Integer,Row>((key+1),value);
 	}
 	
 	public static Tuple2<Integer,Row> mapDataForWWTI(Row a) throws ParseException{
@@ -296,7 +459,227 @@ public class DateTimeAnalysis {
 				keyPt2 = i;
 			}
 		}
-		String keyS = keyPt1 + "" + keyPt2;
+		String keyS = (keyPt1+1) + "" + (keyPt2+1);
+		int key = Integer.parseInt(keyS); 
+		value = getFormattedRow(a);
+		return new Tuple2<Integer,Row>(key,value);
+	}
+	
+	public static Tuple2<Integer,Row> mapDataForTIPT(Row a) throws ParseException{
+		Integer keyPt1 = 0;
+		Integer keyPt2 = 0;
+		Row value = null;
+		for(int i=0; i< Time_intervals.values().length; i++) {
+			if(interval(a, Time_intervals.values()[i])) {
+				keyPt1 = i;
+			}
+		}
+		/*for(int i=0; i< Payment_type.values().length; i++) {
+			if(paymentType(a, Payment_type.values()[i])) {
+				keyPt2 = i;
+			}
+		}*/
+		keyPt2 = Integer.parseInt(a.getAs("payment_type"))-1;
+		String keyS = (keyPt1+1) + "" + (keyPt2+1);
+		int key = Integer.parseInt(keyS); 
+		value = getFormattedRow(a);
+		return new Tuple2<Integer,Row>(key,value);
+	}
+	public static Tuple2<Integer,Row> mapDataForWWPT(Row a) throws ParseException{
+		Integer keyPt1 = 0;
+		Integer keyPt2 = 0;
+		Row value = null;
+		if(weekEnd(a)) {
+			keyPt1 = DayOfWeek.WEEKEND.ordinal();
+		}else {
+			keyPt1 = DayOfWeek.WEEKDAY.ordinal();
+		}
+		/*for(int i=0; i< Payment_type.values().length; i++) {
+			if(paymentType(a, Payment_type.values()[i])) {
+				keyPt2 = i;
+			}
+		}*/
+		keyPt2 = Integer.parseInt(a.getAs("payment_type"))-1;
+		String keyS = (keyPt1+1) + "" + (keyPt2+1);
+		int key = Integer.parseInt(keyS); 
+		value = getFormattedRow(a);
+		return new Tuple2<Integer,Row>(key,value);
+	}
+	public static Tuple2<Integer,Row> mapDataForWWTIPT(Row a) throws ParseException{
+		Integer keyPt1 = 0;
+		Integer keyPt2 = 0;
+		Integer keyPt3 = 0;
+		Row value = null;
+		if(weekEnd(a)) {
+			keyPt1 = DayOfWeek.WEEKEND.ordinal();
+		}else {
+			keyPt1 = DayOfWeek.WEEKDAY.ordinal();
+		}
+		for(int i=0; i< Time_intervals.values().length; i++) {
+			if(interval(a, Time_intervals.values()[i])) {
+				keyPt2 = i;
+			}
+		}
+		/*for(int i=0; i< Payment_type.values().length; i++) {
+			if(paymentType(a, Payment_type.values()[i])) {
+				keyPt3 = i;
+			}
+		}*/
+		keyPt3 = Integer.parseInt(a.getAs("payment_type"))-1;
+		String keyS = (keyPt1+1) + "" + (keyPt2+1) + "" + (keyPt3+1);
+		int key = Integer.parseInt(keyS); 
+		value = getFormattedRow(a);
+		return new Tuple2<Integer,Row>(key,value);
+	}
+	
+	public static Tuple2<Integer,Row> mapDataForWWB(Row a) throws ParseException{
+		Integer keyPt1 = 0;
+		Integer keyPt2 = 0;
+		Row value = null;
+		if(weekEnd(a)) {
+			keyPt1 = DayOfWeek.WEEKEND.ordinal();
+		}else {
+			keyPt1 = DayOfWeek.WEEKDAY.ordinal();
+		}
+		boolean keyPt2Bool = taxyZone.sameBorough(Integer.parseInt(a.getAs("PULocationID")),Integer.parseInt(a.getAs("DOLocationID")));
+		keyPt2 = keyPt2Bool?1:2;
+		String keyS = (keyPt1+1) + "" + keyPt2;
+		int key = Integer.parseInt(keyS); 
+		value = getFormattedRow(a);
+		return new Tuple2<Integer,Row>(key,value);
+	}
+	public static Tuple2<Integer,Row> mapDataForWWPU(Row a) throws ParseException{
+		Integer keyPt1 = 0;
+		Integer keyPt2 = 0;
+		Row value = null;
+		if(weekEnd(a)) {
+			keyPt1 = DayOfWeek.WEEKEND.ordinal();
+		}else {
+			keyPt1 = DayOfWeek.WEEKDAY.ordinal();
+		}
+		keyPt2 = Integer.parseInt(a.getAs("PULocationID"));
+		String keyS = (keyPt1+1) + "" + (FromTo.FROM.ordinal()+1) + "" + keyPt2;
+		int key = Integer.parseInt(keyS); 
+		value = getFormattedRow(a);
+		return new Tuple2<Integer,Row>(key,value);
+	}
+	public static Tuple2<Integer,Row> mapDataForTIDO(Row a) throws ParseException{
+		Integer keyPt1 = 0;
+		Integer keyPt2 = 0;
+		Row value = null;
+		for(int i=0; i< Time_intervals.values().length; i++) {
+			if(interval(a, Time_intervals.values()[i])) {
+				keyPt1 = i;
+			}
+		}
+		keyPt2 = Integer.parseInt(a.getAs("DOLocationID"));
+		String keyS = (keyPt1+1) + "" + (FromTo.TO.ordinal()+1) + "" + keyPt2;
+		int key = Integer.parseInt(keyS); 
+		value = getFormattedRow(a);
+		return new Tuple2<Integer,Row>(key,value);
+	}
+	public static Tuple2<Integer,Row> mapDataForTIPUB(Row a) throws ParseException{
+		Integer keyPt1 = 0;
+		Integer keyPt2 = 0;
+		Row value = null;
+		for(int i=0; i< Time_intervals.values().length; i++) {
+			if(interval(a, Time_intervals.values()[i])) {
+				keyPt1 = i;
+			}
+		}
+		keyPt2 = taxyZone.getBoroughDistId(taxyZone.getBorough(Integer.parseInt(a.getAs("PULocationID"))));
+		String keyS = (keyPt1+1) + "" + (FromTo.FROM.ordinal()+1) + "" + keyPt2;
+		int key = Integer.parseInt(keyS); 
+		value = getFormattedRow(a);
+		return new Tuple2<Integer,Row>(key,value);
+	}
+	public static Tuple2<Integer,Row> mapDataForTIDOB(Row a) throws ParseException{
+		Integer keyPt1 = 0;
+		Integer keyPt2 = 0;
+		Row value = null;
+		for(int i=0; i< Time_intervals.values().length; i++) {
+			if(interval(a, Time_intervals.values()[i])) {
+				keyPt1 = i;
+			}
+		}
+		keyPt2 = taxyZone.getBoroughDistId(taxyZone.getBorough(Integer.parseInt(a.getAs("DOLocationID"))));
+		String keyS = (keyPt1+1) + "" + (FromTo.TO.ordinal()+1) + "" + keyPt2;
+		int key = Integer.parseInt(keyS); 
+		value = getFormattedRow(a);
+		return new Tuple2<Integer,Row>(key,value);
+	}
+	public static Tuple2<Integer,Row> mapDataForTIB(Row a) throws ParseException{
+		Integer keyPt1 = 0;
+		Integer keyPt2 = 0;
+		Row value = null;
+		for(int i=0; i< Time_intervals.values().length; i++) {
+			if(interval(a, Time_intervals.values()[i])) {
+				keyPt1 = i;
+			}
+		}
+		boolean keyPt2Bool = taxyZone.sameBorough(Integer.parseInt(a.getAs("PULocationID")),Integer.parseInt(a.getAs("DOLocationID")));
+		keyPt2 = keyPt2Bool?1:2;
+		String keyS = (keyPt1+1) + "" + keyPt2;
+		int key = Integer.parseInt(keyS); 
+		value = getFormattedRow(a);
+		return new Tuple2<Integer,Row>(key,value);
+	}
+	public static Tuple2<Integer,Row> mapDataForTIPU(Row a) throws ParseException{
+		Integer keyPt1 = 0;
+		Integer keyPt2 = 0;
+		Row value = null;
+		for(int i=0; i< Time_intervals.values().length; i++) {
+			if(interval(a, Time_intervals.values()[i])) {
+				keyPt1 = i;
+			}
+		}
+		keyPt2 = Integer.parseInt(a.getAs("PULocationID"));
+		String keyS = (keyPt1+1) + "" + (FromTo.FROM.ordinal()+1) + "" + keyPt2;
+		int key = Integer.parseInt(keyS); 
+		value = getFormattedRow(a);
+		return new Tuple2<Integer,Row>(key,value);
+	}
+	public static Tuple2<Integer,Row> mapDataForWWDO(Row a) throws ParseException{
+		Integer keyPt1 = 0;
+		Integer keyPt2 = 0;
+		Row value = null;
+		if(weekEnd(a)) {
+			keyPt1 = DayOfWeek.WEEKEND.ordinal();
+		}else {
+			keyPt1 = DayOfWeek.WEEKDAY.ordinal();
+		}
+		keyPt2 = Integer.parseInt(a.getAs("DOLocationID"));
+		String keyS = (keyPt1+1) + "" + (FromTo.TO.ordinal()+1) + "" + keyPt2;
+		int key = Integer.parseInt(keyS); 
+		value = getFormattedRow(a);
+		return new Tuple2<Integer,Row>(key,value);
+	}
+	public static Tuple2<Integer,Row> mapDataForWWPUB(Row a) throws ParseException{
+		Integer keyPt1 = 0;
+		Integer keyPt2 = 0;
+		Row value = null;
+		if(weekEnd(a)) {
+			keyPt1 = DayOfWeek.WEEKEND.ordinal();
+		}else {
+			keyPt1 = DayOfWeek.WEEKDAY.ordinal();
+		}
+		keyPt2 = taxyZone.getBoroughDistId(taxyZone.getBorough(Integer.parseInt(a.getAs("PULocationID"))));
+		String keyS = (keyPt1+1) + "" + (FromTo.FROM.ordinal()+1) + "" + keyPt2;
+		int key = Integer.parseInt(keyS); 
+		value = getFormattedRow(a);
+		return new Tuple2<Integer,Row>(key,value);
+	}
+	public static Tuple2<Integer,Row> mapDataForWWDOB(Row a) throws ParseException{
+		Integer keyPt1 = 0;
+		Integer keyPt2 = 0;
+		Row value = null;
+		if(weekEnd(a)) {
+			keyPt1 = DayOfWeek.WEEKEND.ordinal();
+		}else {
+			keyPt1 = DayOfWeek.WEEKDAY.ordinal();
+		}
+		keyPt2 = taxyZone.getBoroughDistId(taxyZone.getBorough(Integer.parseInt(a.getAs("DOLocationID"))));
+		String keyS = (keyPt1+1) + "" + (FromTo.TO.ordinal()+1) + "" + keyPt2;
 		int key = Integer.parseInt(keyS); 
 		value = getFormattedRow(a);
 		return new Tuple2<Integer,Row>(key,value);
@@ -364,4 +747,90 @@ public class DateTimeAnalysis {
 				1
 				);
 	}
+	/**
+	 * the Rows as to be in this form:
+	 * 0- MaxValueManager maxPassengerCount
+	 * 1- MaxValueManager maxTrip
+	 * 2- MaxValueManager maxExtra
+	 * 3- MaxValueManager maxTip
+	 * 4- MaxValueManager maxTotal
+	 * 5- Integer passengerCounter
+	 * 6- Float sumTrip
+	 * 7- Float sumTip
+	 * 8- Float sumTotal
+	 * 9- Integer counter 
+	 * @param fullList
+	 * @param keyComp
+	 * @throws ClassNotFoundException 
+	 * @throws IllegalAccessException 
+	 * @throws InstantiationException 
+	 */
+	public static void printDataAnalysis(JavaPairRDD<Integer,Row> fullList, Class<?> ... keyComp) {
+		Iterator<Tuple2<Integer, Row>> it= fullList.collect().iterator();
+		while(it.hasNext()) {
+			String keyS = "";
+			Tuple2<Integer, Row> tup = it.next();
+			int key = tup._1;
+			for(int i = keyComp.length-1; i >= 0; i--){
+				Class<?> temp = keyComp[i];
+				if(temp.isEnum()) {
+					Object enumTempVal = temp.getEnumConstants()[key%10-1];
+					keyS += temp.getSimpleName() + ": " + enumTempVal + " ";
+				}else if(temp == Boolean.class){
+					String tempVal = (key%10)==1?"the Same":"Different";
+					keyS += "PU & DO are in " + tempVal + " borough ";
+				}else if(temp == TaxyZone.class) {
+					int tempVal = (key%10);
+					key = key/10;
+					Class<?> temp2 = keyComp[--i];
+					Object tempVal2 = temp2.getEnumConstants()[key%10-1];
+					keyS += tempVal2 + " " + taxyZone.getBorough(tempVal) + " ";
+				}else if(temp == Integer.class) {
+					//TODO: tempVal can be more than 1 character....
+					int lengthN = (new Integer(key)).toString().length();
+					int lengthO = keyComp.length;
+					int tempVal;
+					tempVal = (int) (key%Math.pow(10, (lengthN-lengthO)+1));
+					key =  (key/(int)Math.pow(10, (lengthN-lengthO)+1));
+					Class<?> temp2 = keyComp[--i];
+					Object tempVal2 = temp2.getEnumConstants()[key%10-1];
+					keyS += tempVal2 + " " + taxyZone.getZone(tempVal) + " ";
+					
+				}
+				key = key/10;
+			}
+			keyS += "\nResults:\n";
+			String formattedRow ="";
+			MaxValueManager maxPassengerCount = tup._2.getAs(0);
+			MaxValueManager maxTrip = tup._2.getAs(1);
+			MaxValueManager maxExtra = tup._2.getAs(2);
+			MaxValueManager maxTip = tup._2.getAs(3);
+			MaxValueManager maxTotal = tup._2.getAs(4);
+			Integer passengerCounter = tup._2.getAs(5);
+			Float sumTrip = tup._2.getAs(6);
+			Float sumTip = tup._2.getAs(7);
+			Float sumTotal = tup._2.getAs(8);
+			Integer counter = tup._2.getAs(9);
+			formattedRow += "\tMaxPassengerCount: " + maxPassengerCount + "\n";
+			formattedRow += "\tMaxTripDistance: " + maxTrip + "\n";
+			formattedRow += "\tMaxExtraPaid: " + maxExtra + "\n";
+			formattedRow += "\tMaxTipPaid: " + maxTip + "\n";
+			formattedRow += "\tMaxTotalPaid: " + maxTotal + "\n";
+			formattedRow += "\tAvgPassengerCounter: " + ((double)passengerCounter / counter*1.0) + "\n";
+			formattedRow += "\tAvgTripDistance: " + ((double)sumTrip / counter*1.0) + "\n";
+			formattedRow += "\tAvgTipPaid: " + ((double)sumTip / counter*1.0) + "\n";
+			formattedRow += "\tAvgTotalPaid: " + ((double)sumTotal / counter*1.0) + "\n";
+			formattedRow += "\tRowEvaluated: " + counter + "\n";
+			System.out.println(keyS + formattedRow);
+		}
+	}
+	
+	public static void setTaxyZone(TaxyZone taxyZ) {
+		taxyZone = taxyZ;
+	}
+	
+	public enum FromTo{
+		FROM(),TO();
+	}
 }
+

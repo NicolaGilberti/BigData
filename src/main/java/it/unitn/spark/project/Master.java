@@ -18,10 +18,14 @@ import org.apache.spark.sql.SparkSession.Builder;
 
 import it.unitn.spark.project.custom_classes.*;
 import it.unitn.spark.project.datetime.DateTimeAnalysis;
+import it.unitn.spark.project.datetime.DateTimeAnalysis.FromTo;
 import scala.Tuple2;
 
 public class Master {
 	public static void main(String[] args) throws AnalysisException {
+		//time
+		long start, end;
+		start = System.currentTimeMillis();
 		// SparkSession
 		Builder builder = new Builder().appName("SparkSQL Examples");
 		//if (new File("/Users/").exists()) {
@@ -41,116 +45,83 @@ public class Master {
 		//df.show();
 		
 		JavaRDD<Row> lines = spark.read().format("CSV").option("header", "true").load("yellow_tripdata_2018-01.csv").javaRDD();//temp
+		JavaRDD<Row> lookUpTable = spark.read().format("CSV").option("header", "true").load("taxi _zone_lookup.csv").javaRDD();
+		TaxyZone taxyZone = new TaxyZone(lookUpTable);
+		DateTimeAnalysis.setTaxyZone(taxyZone);
 		/*****************/
 		/**Time analysis**/
 		/*****************/
-//		long a = System.currentTimeMillis();
+//		start = System.currentTimeMillis();
 //		JavaPairRDD<Integer,Row> listOfTimeIntervalsData = DateTimeAnalysis.getValuableDataForTimeIntervals(lines);
-//		JavaPairRDD<Integer,Row> reducedListOfTimeIntervalsData = DateTimeAnalysis.getAllAverages(listOfTimeIntervalsData);
-//		Iterator<Tuple2<Integer, Row>> timeIntervalsIt= reducedListOfTimeIntervalsData.collect().iterator();
-//		while(timeIntervalsIt.hasNext()) {
-//			Tuple2<Integer, Row> tup  = timeIntervalsIt.next();
-//			Time_intervals ti = Time_intervals.values()[tup._1];
-//			String formattedRow ="";
-//			MaxValueManager maxPassengerCount = tup._2.getAs(0);
-//			MaxValueManager maxTrip = tup._2.getAs(1);
-//			MaxValueManager maxExtra = tup._2.getAs(2);
-//			MaxValueManager maxTip = tup._2.getAs(3);
-//			MaxValueManager maxTotal = tup._2.getAs(4);
-//			Integer passengerCounter = tup._2.getAs(5);
-//			Float sumTrip = tup._2.getAs(6);
-//			Float sumTip = tup._2.getAs(7);
-//			Float sumTotal = tup._2.getAs(8);
-//			Integer counter = tup._2.getAs(9);
-//			formattedRow += "\tMaxPassengerCount: " + maxPassengerCount + "\n";
-//			formattedRow += "\tMaxTripDistance: " + maxTrip + "\n";
-//			formattedRow += "\tMaxExtraPaid: " + maxExtra + "\n";
-//			formattedRow += "\tMaxTipPaid: " + maxTip + "\n";
-//			formattedRow += "\tMaxTotalPaid: " + maxTotal + "\n";
-//			formattedRow += "\tAvgPassengerCounter: " + ((double)passengerCounter / counter*1.0) + "\n";
-//			formattedRow += "\tAvgTripDistance: " + ((double)sumTrip / counter*1.0) + "\n";
-//			formattedRow += "\tAvgTipPaid: " + ((double)sumTip / counter*1.0) + "\n";
-//			formattedRow += "\tAvgTotalPaid: " + ((double)sumTotal / counter*1.0) + "\n";
-//			formattedRow += "\tRowEvaluated: " + counter + "\n";
-//			System.out.println(ti.getClass().getSimpleName() + ": " + ti + " results:\n" + formattedRow);
-//		}
-//		long b = System.currentTimeMillis();
-//		long deltaAB = (b-a);
-//		System.out.println("exec time(h:min:sec:ms): " + deltaAB / 1000 / 60 / 60 + ":" + (deltaAB/1000/60) % 60 + ":" + (deltaAB/1000) % 60 + ":" + deltaAB % 1000 + "\n");
-
-//		long c = System.currentTimeMillis();
+//		JavaPairRDD<Integer,Row> reducedListOfTimeIntervalsData = DateTimeAnalysis.getAllReducedData(listOfTimeIntervalsData);
+//		DateTimeAnalysis.printDataAnalysis(reducedListOfTimeIntervalsData, Time_intervals.class);
+//		end = System.currentTimeMillis();
+//		System.out.println(getStringTime(start,end));
+		
+//		start = System.currentTimeMillis();
 //		JavaPairRDD<Integer,Row> listOfWeekendWeekdaysData = DateTimeAnalysis.getValuableDataForWeekendWeekdays(lines);
-//		JavaPairRDD<Integer,Row> reducedListOfWeekendWeekdaysData = DateTimeAnalysis.getAllAverages(listOfWeekendWeekdaysData);
-//		Iterator<Tuple2<Integer, Row>> weekendWeekdaysIt= reducedListOfWeekendWeekdaysData.collect().iterator();
-//		while(weekendWeekdaysIt.hasNext()) {
-//			Tuple2<Integer, Row> tup  = weekendWeekdaysIt.next();
-//			DayOfWeek ti = DayOfWeek.values()[tup._1];
-//			String formattedRow ="";
-//			MaxValueManager maxPassengerCount = tup._2.getAs(0);
-//			MaxValueManager maxTrip = tup._2.getAs(1);
-//			MaxValueManager maxExtra = tup._2.getAs(2);
-//			MaxValueManager maxTip = tup._2.getAs(3);
-//			MaxValueManager maxTotal = tup._2.getAs(4);
-//			Integer passengerCounter = tup._2.getAs(5);
-//			Float sumTrip = tup._2.getAs(6);
-//			Float sumTip = tup._2.getAs(7);
-//			Float sumTotal = tup._2.getAs(8);
-//			Integer counter = tup._2.getAs(9);
-//			formattedRow += "\tMaxPassengerCount: " + maxPassengerCount + "\n";
-//			formattedRow += "\tMaxTripDistance: " + maxTrip + "\n";
-//			formattedRow += "\tMaxExtraPaid: " + maxExtra + "\n";
-//			formattedRow += "\tMaxTipPaid: " + maxTip + "\n";
-//			formattedRow += "\tMaxTotalPaid: " + maxTotal + "\n";
-//			formattedRow += "\tAvgPassengerCounter: " + ((double)passengerCounter / counter*1.0) + "\n";
-//			formattedRow += "\tAvgTripDistance: " + ((double)sumTrip / counter*1.0) + "\n";
-//			formattedRow += "\tAvgTipPaid: " + ((double)sumTip / counter*1.0) + "\n";
-//			formattedRow += "\tAvgTotalPaid: " + ((double)sumTotal / counter*1.0) + "\n";
-//			formattedRow += "\tRowEvaluated: " + counter + "\n";
-//			System.out.println(ti.getClass().getSimpleName() + ": " + ti + " results:\n" + formattedRow);
-//		}
-//		long d = System.currentTimeMillis();
-//		long deltaCD = (d-c);
-//		System.out.println("exec time(h:min:sec:ms): " + deltaTCD / 1000 / 60 / 60 + ":" + (deltaCD/1000/60) % 60 + ":" + (deltaCD/1000) % 60 + ":" + deltaCD % 1000 + "\n");
+//		JavaPairRDD<Integer,Row> reducedListOfWeekendWeekdaysData = DateTimeAnalysis.getAllReducedData(listOfWeekendWeekdaysData);
+//		DateTimeAnalysis.printDataAnalysis(reducedListOfWeekendWeekdaysData, DayOfWeek.class);
+//		end = System.currentTimeMillis();
+//		System.out.println(getStringTime(start,end));
+		
+//		start = System.currentTimeMillis();
+//		JavaPairRDD<Integer,Row> listOfWWTIData = DateTimeAnalysis.getValuableDataForWWTI(lines);
+//		JavaPairRDD<Integer,Row> reducedListOfWWTIData = DateTimeAnalysis.getAllReducedData(listOfWWTIData);
+//		DateTimeAnalysis.printDataAnalysis(reducedListOfWWTIData, DayOfWeek.class, Time_intervals.class);
+//		end = System.currentTimeMillis();
+//		System.out.println(getStringTime(start,end));
+		
+//		start = System.currentTimeMillis();
+//		JavaPairRDD<Integer,Row> listOfTIPTData = DateTimeAnalysis.getValuableDataForTIPT(lines);
+//		JavaPairRDD<Integer,Row> reducedListOfTIPTData = DateTimeAnalysis.getAllReducedData(listOfTIPTData);
+//		DateTimeAnalysis.printDataAnalysis(reducedListOfTIPTData, Time_intervals.class, Payment_type.class);
+//		end = System.currentTimeMillis();
+//		System.out.println(getStringTime(start,end));
+		
+//		start = System.currentTimeMillis();
+//		JavaPairRDD<Integer,Row> listOfWWPTData = DateTimeAnalysis.getValuableDataForWWPT(lines);
+//		JavaPairRDD<Integer,Row> reducedListOfWWPTData = DateTimeAnalysis.getAllReducedData(listOfWWPTData);
+//		DateTimeAnalysis.printDataAnalysis(reducedListOfWWPTData, DayOfWeek.class, Payment_type.class);
+//		end = System.currentTimeMillis();
+//		System.out.println(getStringTime(start,end));
+		
+//		start = System.currentTimeMillis();
+//		JavaPairRDD<Integer,Row> listOfWWTIPTData = DateTimeAnalysis.getValuableDataForWWTIPT(lines);
+//		JavaPairRDD<Integer,Row> reducedListOfWWTIPTData = DateTimeAnalysis.getAllReducedData(listOfWWTIPTData);
+//		DateTimeAnalysis.printDataAnalysis(reducedListOfWWTIPTData, DayOfWeek.class, Time_intervals.class, Payment_type.class);
+//		end = System.currentTimeMillis();
+//		System.out.println(getStringTime(start,end));
+		
+//		start = System.currentTimeMillis();
+//		JavaPairRDD<Integer,Row> listOfTIBData = DateTimeAnalysis.getValuableDataForTIB(lines);
+//		JavaPairRDD<Integer,Row> reducedListOfTIBData = DateTimeAnalysis.getAllReducedData(listOfTIBData);
+//		DateTimeAnalysis.printDataAnalysis(reducedListOfTIBData, Time_intervals.class, Boolean.class);
+//		end = System.currentTimeMillis();
+//		System.out.println(getStringTime(start,end));
 
-		long e = System.currentTimeMillis();
-		JavaPairRDD<Integer,Row> listOfWWTIData = DateTimeAnalysis.getValuableDataForWWTI(lines);
-		JavaPairRDD<Integer,Row> reducedListOfWWTIData = DateTimeAnalysis.getAllAverages(listOfWWTIData);
-		Iterator<Tuple2<Integer, Row>> WWTIIt= reducedListOfWWTIData.collect().iterator();
-		while(WWTIIt.hasNext()) {
-			Tuple2<Integer, Row> tup  = WWTIIt.next();
-			int key = tup._1;
-			String keyS = "";
-			DayOfWeek ww = DayOfWeek.values()[key/10];
-			Time_intervals ti = Time_intervals.values()[key%10];
-			keyS += ww.getClass().getSimpleName() + ": " + ww + " ";
-			keyS += ti.getClass().getSimpleName() + ": " + ti  + "\nResults:\n" ;
-			String formattedRow ="";
-			MaxValueManager maxPassengerCount = tup._2.getAs(0);
-			MaxValueManager maxTrip = tup._2.getAs(1);
-			MaxValueManager maxExtra = tup._2.getAs(2);
-			MaxValueManager maxTip = tup._2.getAs(3);
-			MaxValueManager maxTotal = tup._2.getAs(4);
-			Integer passengerCounter = tup._2.getAs(5);
-			Float sumTrip = tup._2.getAs(6);
-			Float sumTip = tup._2.getAs(7);
-			Float sumTotal = tup._2.getAs(8);
-			Integer counter = tup._2.getAs(9);
-			formattedRow += "\tMaxPassengerCount: " + maxPassengerCount + "\n";
-			formattedRow += "\tMaxTripDistance: " + maxTrip + "\n";
-			formattedRow += "\tMaxExtraPaid: " + maxExtra + "\n";
-			formattedRow += "\tMaxTipPaid: " + maxTip + "\n";
-			formattedRow += "\tMaxTotalPaid: " + maxTotal + "\n";
-			formattedRow += "\tAvgPassengerCounter: " + ((double)passengerCounter / counter*1.0) + "\n";
-			formattedRow += "\tAvgTripDistance: " + ((double)sumTrip / counter*1.0) + "\n";
-			formattedRow += "\tAvgTipPaid: " + ((double)sumTip / counter*1.0) + "\n";
-			formattedRow += "\tAvgTotalPaid: " + ((double)sumTotal / counter*1.0) + "\n";
-			formattedRow += "\tRowEvaluated: " + counter + "\n";
-			System.out.println(keyS + formattedRow);
-		}
-		long f = System.currentTimeMillis();
-		long deltaEF = (f-e);
-		System.out.println("exec time(h:min:sec:ms): " + deltaEF / 1000 / 60 / 60 + ":" + (deltaEF/1000/60) % 60 + ":" + (deltaEF/1000) % 60 + ":" + deltaEF % 1000 + "\n");
+//		start = System.currentTimeMillis();
+//		JavaPairRDD<Integer,Row> listOfTIPUData = DateTimeAnalysis.getValuableDataForTIPU(lines);
+//		JavaPairRDD<Integer,Row> reducedListOfTIPUData = DateTimeAnalysis.getAllReducedData(listOfTIPUData);
+//		DateTimeAnalysis.printDataAnalysis(reducedListOfTIPUData, Time_intervals.class, FromTo.class, Integer.class);
+//		end = System.currentTimeMillis();
+//		System.out.println(getStringTime(start,end));
 
+//		start = System.currentTimeMillis();
+//		JavaPairRDD<Integer,Row> listOfTIPUBData = DateTimeAnalysis.getValuableDataForTIPUB(lines);
+//		JavaPairRDD<Integer,Row> reducedListOfTIPUBData = DateTimeAnalysis.getAllReducedData(listOfTIPUBData);
+//		DateTimeAnalysis.printDataAnalysis(reducedListOfTIPUBData, Time_intervals.class, FromTo.class, TaxyZone.class);
+//		end = System.currentTimeMillis();
+//		System.out.println(getStringTime(start,end));
+		
+//		start = System.currentTimeMillis();
+//		JavaPairRDD<Integer,Row> listOfWWPUBData = DateTimeAnalysis.getValuableDataForWWPUB(lines);
+//		JavaPairRDD<Integer,Row> reducedListOfWWPUBData = DateTimeAnalysis.getAllReducedData(listOfWWPUBData);
+//		DateTimeAnalysis.printDataAnalysis(reducedListOfWWPUBData, DayOfWeek.class, FromTo.class, TaxyZone.class);
+//		end = System.currentTimeMillis();
+//		System.out.println(getStringTime(start,end));
+		
+		System.out.println(taxyZone.boroughString());
 		/** trials **/
 //		Iterator it= _.collect().iterator();
 //		while(it.hasNext()) {
@@ -204,6 +175,11 @@ public class Master {
 		else {
 			return b;
 		}
+	}
+	
+	private static String getStringTime(long start, long end) {
+		long delta = (end-start);
+		return "exec time(h:min:sec:ms): " + delta / 1000 / 60 / 60 + ":" + (delta/1000/60) % 60 + ":" + (delta/1000) % 60 + ":" + delta % 1000 + "\n";
 	}
 
 }
