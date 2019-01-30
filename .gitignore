@@ -39,4 +39,4 @@ buildNumber.properties
 .mvn/wrapper/maven-wrapper.jar
 
 #extra
-yellow_tripdata_2018-01.csv
+files/*.csv

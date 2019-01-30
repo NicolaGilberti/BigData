@@ -15,10 +15,12 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.SparkSession.Builder;
+import org.apache.spark.storage.StorageLevel;
 
 import it.unitn.spark.project.custom_classes.*;
 import it.unitn.spark.project.datetime.DateTimeAnalysis;
 import it.unitn.spark.project.datetime.DateTimeAnalysis.FromTo;
+import it.unitn.spark.project.distance.DistanceAnalysis;
 import scala.Tuple2;
 
 public class Master {
@@ -44,10 +46,17 @@ public class Master {
 				;
 		//df.show();
 		
-		JavaRDD<Row> lines = spark.read().format("CSV").option("header", "true").load("yellow_tripdata_2018-01.csv").javaRDD();//temp
+		JavaRDD<Row> lines = spark.read().format("CSV")
+				.option("header", "true")
+				.load("files/yellow_tripdata_2018-01.csv")
+				//.persist(StorageLevel.MEMORY_ONLY())	/* https://spark.apache.org/docs/latest/rdd-programming-guide.html#rdd-persistence */
+				//.limit(100)
+				.javaRDD()
+				;
 		JavaRDD<Row> lookUpTable = spark.read().format("CSV").option("header", "true").load("taxi _zone_lookup.csv").javaRDD();
 		TaxyZone taxyZone = new TaxyZone(lookUpTable);
 		DateTimeAnalysis.setTaxyZone(taxyZone);
+		
 		/*****************/
 		/**Time analysis**/
 		/*****************/
@@ -57,63 +66,63 @@ public class Master {
 //		DateTimeAnalysis.printDataAnalysis(reducedListOfTimeIntervalsData, Time_intervals.class);
 //		end = System.currentTimeMillis();
 //		System.out.println(getStringTime(start,end));
-		
+//		
 //		start = System.currentTimeMillis();
 //		JavaPairRDD<Integer,Row> listOfWeekendWeekdaysData = DateTimeAnalysis.getValuableDataForWeekendWeekdays(lines);
 //		JavaPairRDD<Integer,Row> reducedListOfWeekendWeekdaysData = DateTimeAnalysis.getAllReducedData(listOfWeekendWeekdaysData);
 //		DateTimeAnalysis.printDataAnalysis(reducedListOfWeekendWeekdaysData, DayOfWeek.class);
 //		end = System.currentTimeMillis();
 //		System.out.println(getStringTime(start,end));
-		
+//		
 //		start = System.currentTimeMillis();
 //		JavaPairRDD<Integer,Row> listOfWWTIData = DateTimeAnalysis.getValuableDataForWWTI(lines);
 //		JavaPairRDD<Integer,Row> reducedListOfWWTIData = DateTimeAnalysis.getAllReducedData(listOfWWTIData);
 //		DateTimeAnalysis.printDataAnalysis(reducedListOfWWTIData, DayOfWeek.class, Time_intervals.class);
 //		end = System.currentTimeMillis();
 //		System.out.println(getStringTime(start,end));
-		
+//		
 //		start = System.currentTimeMillis();
 //		JavaPairRDD<Integer,Row> listOfTIPTData = DateTimeAnalysis.getValuableDataForTIPT(lines);
 //		JavaPairRDD<Integer,Row> reducedListOfTIPTData = DateTimeAnalysis.getAllReducedData(listOfTIPTData);
 //		DateTimeAnalysis.printDataAnalysis(reducedListOfTIPTData, Time_intervals.class, Payment_type.class);
 //		end = System.currentTimeMillis();
 //		System.out.println(getStringTime(start,end));
-		
+//		
 //		start = System.currentTimeMillis();
 //		JavaPairRDD<Integer,Row> listOfWWPTData = DateTimeAnalysis.getValuableDataForWWPT(lines);
 //		JavaPairRDD<Integer,Row> reducedListOfWWPTData = DateTimeAnalysis.getAllReducedData(listOfWWPTData);
 //		DateTimeAnalysis.printDataAnalysis(reducedListOfWWPTData, DayOfWeek.class, Payment_type.class);
 //		end = System.currentTimeMillis();
 //		System.out.println(getStringTime(start,end));
-		
+//		
 //		start = System.currentTimeMillis();
 //		JavaPairRDD<Integer,Row> listOfWWTIPTData = DateTimeAnalysis.getValuableDataForWWTIPT(lines);
 //		JavaPairRDD<Integer,Row> reducedListOfWWTIPTData = DateTimeAnalysis.getAllReducedData(listOfWWTIPTData);
 //		DateTimeAnalysis.printDataAnalysis(reducedListOfWWTIPTData, DayOfWeek.class, Time_intervals.class, Payment_type.class);
 //		end = System.currentTimeMillis();
 //		System.out.println(getStringTime(start,end));
-		
+//		
 //		start = System.currentTimeMillis();
 //		JavaPairRDD<Integer,Row> listOfTIBData = DateTimeAnalysis.getValuableDataForTIB(lines);
 //		JavaPairRDD<Integer,Row> reducedListOfTIBData = DateTimeAnalysis.getAllReducedData(listOfTIBData);
 //		DateTimeAnalysis.printDataAnalysis(reducedListOfTIBData, Time_intervals.class, Boolean.class);
 //		end = System.currentTimeMillis();
 //		System.out.println(getStringTime(start,end));
-
+//
 //		start = System.currentTimeMillis();
 //		JavaPairRDD<Integer,Row> listOfTIPUData = DateTimeAnalysis.getValuableDataForTIPU(lines);
 //		JavaPairRDD<Integer,Row> reducedListOfTIPUData = DateTimeAnalysis.getAllReducedData(listOfTIPUData);
 //		DateTimeAnalysis.printDataAnalysis(reducedListOfTIPUData, Time_intervals.class, FromTo.class, Integer.class);
 //		end = System.currentTimeMillis();
 //		System.out.println(getStringTime(start,end));
-
+//
 //		start = System.currentTimeMillis();
 //		JavaPairRDD<Integer,Row> listOfTIPUBData = DateTimeAnalysis.getValuableDataForTIPUB(lines);
 //		JavaPairRDD<Integer,Row> reducedListOfTIPUBData = DateTimeAnalysis.getAllReducedData(listOfTIPUBData);
 //		DateTimeAnalysis.printDataAnalysis(reducedListOfTIPUBData, Time_intervals.class, FromTo.class, TaxyZone.class);
 //		end = System.currentTimeMillis();
 //		System.out.println(getStringTime(start,end));
-		
+//		
 //		start = System.currentTimeMillis();
 //		JavaPairRDD<Integer,Row> listOfWWPUBData = DateTimeAnalysis.getValuableDataForWWPUB(lines);
 //		JavaPairRDD<Integer,Row> reducedListOfWWPUBData = DateTimeAnalysis.getAllReducedData(listOfWWPUBData);
@@ -121,7 +130,26 @@ public class Master {
 //		end = System.currentTimeMillis();
 //		System.out.println(getStringTime(start,end));
 		
-		System.out.println(taxyZone.boroughString());
+		/**************************/
+		/**Trip Distance analysis**/
+		/**************************/
+//		start = System.currentTimeMillis();
+//		JavaPairRDD<Integer,Row> listOfDistanceIntervalsData = DistanceAnalysis.getValuableDataForDistanceIntervals(lines);
+//		JavaPairRDD<Integer,Row> reducedListOfDistanceIntervalsData = DistanceAnalysis.getAllReducedData(listOfDistanceIntervalsData);
+//		Helper.printDataAnalysis(reducedListOfDistanceIntervalsData, Distance_Intervals.class);
+//		end = System.currentTimeMillis();
+//		System.out.println(getStringTime(start,end));
+//		
+//		//Distance Analysis for different distance intervals wrt recordId
+//		start = System.currentTimeMillis();
+//		JavaPairRDD<Integer,Row> listOfDIRIDData = DistanceAnalysis.getValuableDataForDIRID(lines);
+//		JavaPairRDD<Integer,Row> reducedListOfDIRIDData = DistanceAnalysis.getAllReducedData(listOfDIRIDData);
+//		Helper.printDataAnalysis(reducedListOfDIRIDData, Distance_Intervals.class, RateCodeID.class);
+//		end = System.currentTimeMillis();
+//		System.out.println(getStringTime(start,end));
+		
+		
+		//System.out.println(taxyZone.boroughString());
 		/** trials **/
 //		Iterator it= _.collect().iterator();
 //		while(it.hasNext()) {
