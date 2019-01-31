@@ -1,4 +1,4 @@
-package it.unitn.spark.project.datetime;
+package it.unitn.spark.project.analysis;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -784,6 +784,7 @@ public class DateTimeAnalysis {
 					key = key/10;
 					Class<?> temp2 = keyComp[--i];
 					Object tempVal2 = temp2.getEnumConstants()[key%10-1];
+					//TODO: taxyZone.getBorough must be replaced with taxyZone.getBoroughDistName
 					keyS += tempVal2 + " " + taxyZone.getBorough(tempVal) + " ";
 				}else if(temp == Integer.class) {
 					//TODO: tempVal can be more than 1 character....

@@ -10,7 +10,7 @@ import scala.Tuple2;
 
 public class Helper {
 
-	private static TaxyZone taxyZone = null;
+	public static TaxyZone taxyZone = null;
 	
 	/*********************/
 	/**  Extra methods  **/
@@ -23,10 +23,12 @@ public class Helper {
 				new MaxValueManager(new Tuple2<Float,Integer>(Float.parseFloat(a.getAs("extra")),1)),
 				new MaxValueManager(new Tuple2<Float,Integer>(Float.parseFloat(a.getAs("tip_amount")),1)),
 				new MaxValueManager(new Tuple2<Float,Integer>(Float.parseFloat(a.getAs("total_amount")),1)),
+				new MaxValueManager(new Tuple2<Float,Integer>(Float.parseFloat(a.getAs("tolls_amount")),1)),
 				Integer.parseInt(a.getAs("passenger_count")),
 				Float.parseFloat(a.getAs("trip_distance")),
 				Float.parseFloat(a.getAs("tip_amount")),
 				Float.parseFloat(a.getAs("total_amount")),
+				Float.parseFloat(a.getAs("tolls_amount")),
 				1
 				);
 	}
@@ -38,21 +40,25 @@ public class Helper {
 		MaxValueManager a2 = a.getAs(2);
 		MaxValueManager a3 = a.getAs(3);
 		MaxValueManager a4 = a.getAs(4);
+		MaxValueManager a5 = a.getAs(5);
 		MaxValueManager b0 = b.getAs(0);
 		MaxValueManager b1 = b.getAs(1);
 		MaxValueManager b2 = b.getAs(2);
 		MaxValueManager b3 = b.getAs(3);
 		MaxValueManager b4 = b.getAs(4);
+		MaxValueManager b5 = b.getAs(5);
 		MaxValueManager elem0 = a0.setValues(b0);
 		MaxValueManager elem1 = a1.setValues(b1);
 		MaxValueManager elem2 = a2.setValues(b2);
 		MaxValueManager elem3 = a3.setValues(b3);
 		MaxValueManager elem4 = a4.setValues(b4);
-		Integer elem5 = (int)a.getAs(5) + (int)b.getAs(5);
-		Float elem6 = (float)a.getAs(6) + (float)b.getAs(6);
+		MaxValueManager elem5 = a5.setValues(b5);
+		Integer elem6 = (int)a.getAs(6) + (int)b.getAs(6);
 		Float elem7 = (float)a.getAs(7) + (float)b.getAs(7);
 		Float elem8 = (float)a.getAs(8) + (float)b.getAs(8);
-		Integer elem9 = (int)a.getAs(9) + (int)b.getAs(9);
+		Float elem9 = (float)a.getAs(9) + (float)b.getAs(9);
+		Float elem10 = (float)a.getAs(10) + (float)b.getAs(10);
+		Integer elem11 = (int)a.getAs(11) + (int)b.getAs(11);
 		res = RowFactory.create(elem0,
 				elem1,
 				elem2,
@@ -62,7 +68,9 @@ public class Helper {
 				elem6,
 				elem7,
 				elem8,
-				elem9
+				elem9,
+				elem10,
+				elem11
 				);
 		
 		return res;
@@ -103,10 +111,18 @@ public class Helper {
 					keyS += "PU & DO are in " + tempVal + " borough ";
 				}else if(temp == TaxyZone.class) {
 					int tempVal = (key%10);
-					key = key/10;
-					Class<?> temp2 = keyComp[--i];
-					Object tempVal2 = temp2.getEnumConstants()[key%10-1];
-					keyS += tempVal2 + " " + taxyZone.getBorough(tempVal) + " ";
+					if(i>0) {
+						Class<?> temp2 = keyComp[--i];
+						key = key/10;
+						if(temp2.isEnum()) {
+							Object tempVal2 = temp2.getEnumConstants()[key%10-1];
+							keyS += tempVal2 + " " + taxyZone.getBorough(tempVal) + " ";
+						}
+						else if(temp2 == TaxyZone.class) {
+							keyS +="FROM: "+ taxyZone.getBoroughDistName(key%10); 
+							keyS +=", TO: " + taxyZone.getBoroughDistName(tempVal) + " ";
+						}
+					}
 				}else if(temp == Integer.class) {
 					//TODO: tempVal can be more than 1 character....
 					int lengthN = (new Integer(key)).toString().length();
@@ -128,23 +144,30 @@ public class Helper {
 			MaxValueManager maxExtra = tup._2.getAs(2);
 			MaxValueManager maxTip = tup._2.getAs(3);
 			MaxValueManager maxTotal = tup._2.getAs(4);
-			Integer passengerCounter = tup._2.getAs(5);
-			Float sumTrip = tup._2.getAs(6);
-			Float sumTip = tup._2.getAs(7);
-			Float sumTotal = tup._2.getAs(8);
-			Integer counter = tup._2.getAs(9);
+			MaxValueManager maxToll = tup._2.getAs(5);
+			Integer passengerCounter = tup._2.getAs(6);
+			Float sumTrip = tup._2.getAs(7);
+			Float sumTip = tup._2.getAs(8);
+			Float sumTotal = tup._2.getAs(9);
+			Float sumToll = tup._2.getAs(10);
+			Integer counter = tup._2.getAs(11);
 			formattedRow += "\tMaxPassengerCount: " + maxPassengerCount + "\n";
 			formattedRow += "\tMaxTripDistance: " + maxTrip + "\n";
 			formattedRow += "\tMaxExtraPaid: " + maxExtra + "\n";
 			formattedRow += "\tMaxTipPaid: " + maxTip + "\n";
 			formattedRow += "\tMaxTotalPaid: " + maxTotal + "\n";
+			formattedRow += "\tMaxTollPaid: " + maxToll + "\n";
 			formattedRow += "\tAvgPassengerCounter: " + ((double)passengerCounter / counter*1.0) + "\n";
 			formattedRow += "\tAvgTripDistance: " + ((double)sumTrip / counter*1.0) + "\n";
 			formattedRow += "\tAvgTipPaid: " + ((double)sumTip / counter*1.0) + "\n";
 			formattedRow += "\tAvgTotalPaid: " + ((double)sumTotal / counter*1.0) + "\n";
+			formattedRow += "\tAvgTollPaid: " + ((double)sumToll / counter*1.0) + "\n";
 			formattedRow += "\tRowEvaluated: " + counter + "\n";
 			System.out.println(keyS + formattedRow);
 		}
+	}
+	public static void setTaxyZone(TaxyZone taxyZ) {
+		taxyZone = taxyZ;
 	}
 
 }

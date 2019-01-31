@@ -1,21 +1,12 @@
-package it.unitn.spark.project.distance;
+package it.unitn.spark.project.analysis;
 
 import java.text.ParseException;
-import java.util.Iterator;
 
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.Row;
-import org.apache.spark.sql.RowFactory;
 
-import it.unitn.spark.project.custom_classes.DayOfWeek;
-import it.unitn.spark.project.custom_classes.Distance_Intervals;
-import it.unitn.spark.project.custom_classes.Helper;
-import it.unitn.spark.project.custom_classes.MaxValueManager;
-import it.unitn.spark.project.custom_classes.Payment_type;
-import it.unitn.spark.project.custom_classes.RateCodeID;
-import it.unitn.spark.project.custom_classes.TaxyZone;
-import it.unitn.spark.project.custom_classes.Time_intervals;
+import it.unitn.spark.project.custom_classes.*;
 import scala.Tuple2;
 
 public class DistanceAnalysis {

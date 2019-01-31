@@ -18,9 +18,8 @@ import org.apache.spark.sql.SparkSession.Builder;
 import org.apache.spark.storage.StorageLevel;
 
 import it.unitn.spark.project.custom_classes.*;
-import it.unitn.spark.project.datetime.DateTimeAnalysis;
-import it.unitn.spark.project.datetime.DateTimeAnalysis.FromTo;
-import it.unitn.spark.project.distance.DistanceAnalysis;
+import it.unitn.spark.project.analysis.*;
+import it.unitn.spark.project.analysis.DateTimeAnalysis.FromTo;
 import scala.Tuple2;
 
 public class Master {
@@ -50,12 +49,13 @@ public class Master {
 				.option("header", "true")
 				.load("files/yellow_tripdata_2018-01.csv")
 				//.persist(StorageLevel.MEMORY_ONLY())	/* https://spark.apache.org/docs/latest/rdd-programming-guide.html#rdd-persistence */
-				//.limit(100)
+				//.limit(10)
 				.javaRDD()
 				;
 		JavaRDD<Row> lookUpTable = spark.read().format("CSV").option("header", "true").load("taxi _zone_lookup.csv").javaRDD();
 		TaxyZone taxyZone = new TaxyZone(lookUpTable);
 		DateTimeAnalysis.setTaxyZone(taxyZone);
+		Helper.setTaxyZone(taxyZone);
 		
 		/*****************/
 		/**Time analysis**/
@@ -147,6 +147,45 @@ public class Master {
 //		Helper.printDataAnalysis(reducedListOfDIRIDData, Distance_Intervals.class, RateCodeID.class);
 //		end = System.currentTimeMillis();
 //		System.out.println(getStringTime(start,end));
+		
+		/*************************/
+		/**	PU and DO Analysis	**/
+		/*************************/
+//		start = System.currentTimeMillis();
+//		JavaPairRDD<Integer,Row> listOfPUDOData = PUDOAnalysis.getValuableDataForPUDO(lines);
+//		JavaPairRDD<Integer,Row> reducedListOfPUDOData = PUDOAnalysis.getAllReducedData(listOfPUDOData);
+//		Helper.printDataAnalysis(reducedListOfPUDOData, TaxyZone.class, TaxyZone.class);
+//		end = System.currentTimeMillis();
+//		System.out.println(getStringTime(start,end));
+//		
+//		start = System.currentTimeMillis();
+//		JavaPairRDD<Integer,Row> listOfSamePUDOData = PUDOAnalysis.getValuableDataForSamePUDO(lines);
+//		JavaPairRDD<Integer,Row> reducedListOfSamePUDOData = PUDOAnalysis.getAllReducedData(listOfSamePUDOData);
+//		Helper.printDataAnalysis(reducedListOfSamePUDOData, TaxyZone.class, TaxyZone.class);
+//		end = System.currentTimeMillis();
+//		System.out.println(getStringTime(start,end));
+		
+		/*************************/
+		/**	Rate Code Analysis	**/
+		/*************************/
+//		start = System.currentTimeMillis();
+//		JavaPairRDD<Integer,Row> listOfRCIDData = RateCodeAnalysis.getValuableDataForRCID(lines);
+//		JavaPairRDD<Integer,Row> reducedListOfRCIDData = RateCodeAnalysis.getAllReducedData(listOfRCIDData);
+//		Helper.printDataAnalysis(reducedListOfRCIDData, RateCodeID.class);
+//		end = System.currentTimeMillis();
+//		System.out.println(getStringTime(start,end));
+		
+		/*********************************/
+		/**	Store And Forward Analysis	**/
+		/*********************************/
+//		start = System.currentTimeMillis();
+//		JavaPairRDD<Integer,Row> listOfSFData = StoreForwardAnalysis.getValuableDataForSF(lines);
+//		JavaPairRDD<Integer,Row> reducedListOfSFData = StoreForwardAnalysis.getAllReducedData(listOfSFData);
+//		Helper.printDataAnalysis(reducedListOfSFData, StoreForward.class);
+//		end = System.currentTimeMillis();
+//		System.out.println(StoreForward.values()[0].getStatus());
+//		System.out.println(getStringTime(start,end));
+		
 		
 		
 		//System.out.println(taxyZone.boroughString());

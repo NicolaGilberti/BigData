@@ -1,15 +1,11 @@
 package it.unitn.spark.project.custom_classes;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
+import java.util.Objects;
 
-import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.Row;
-import org.apache.spark.sql.RowFactory;
-import org.apache.spark.sql.SparkSession;
 
 import scala.Tuple2;
 
@@ -41,6 +37,15 @@ public class TaxyZone {
 	
 	public int getBoroughDistId(String boroughName) {
 		return boroughDistinct.get(boroughName);
+	}
+	
+	public String getBoroughDistName(int value) {
+		return boroughDistinct.entrySet()
+				.stream()
+				.filter(entry -> Objects.equals(entry.getValue(), value))
+				.findFirst()
+				.get()
+				.getKey();
 	}
 	
 	public boolean sameBorough(Integer locIdA, Integer locIdB) {
