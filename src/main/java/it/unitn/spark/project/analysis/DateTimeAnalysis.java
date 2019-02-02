@@ -825,7 +825,100 @@ public class DateTimeAnalysis {
 			System.out.println(keyS + formattedRow);
 		}
 	}
-	
+	/**
+ * the Rows as to be in this form:
+ * 0- MaxValueManager maxPassengerCount
+ * 1- MaxValueManager maxTrip
+ * 2- MaxValueManager maxExtra
+ * 3- MaxValueManager maxTip
+ * 4- MaxValueManager maxTotal
+ * 5- Integer passengerCounter
+ * 6- Float sumTrip
+ * 7- Float sumTip
+ * 8- Float sumTotal
+ * 9- Integer counter 
+ * @param fullList
+ * @param keyComp
+ * @throws ClassNotFoundException 
+ * @throws IllegalAccessException 
+ * @throws InstantiationException 
+ */
+public static String cSVDataAnalysis(JavaPairRDD<Integer,Row> fullList, Class<?> ... keyComp) {
+	Iterator<Tuple2<Integer, Row>> it= fullList.collect().iterator();
+	boolean header = true;
+	String keyHeader = "";
+	int balance;
+	String csvRow = "";
+	while(it.hasNext()) {
+		String keyS = "";
+		Tuple2<Integer, Row> tup = it.next();
+		int key = tup._1;
+		for(int i = keyComp.length-1; i >= 0; i--){
+			Class<?> temp = keyComp[i];
+			if(temp.isEnum()) {
+				Object enumTempVal = temp.getEnumConstants()[key%10-1];
+				keyS += temp.getSimpleName() + ",";
+				csvRow += enumTempVal + ",";
+			}else if(temp == Boolean.class){
+				String tempVal = (key%10)==1?"Same":"Different";
+				keyS += "PU/DO borough ";
+				csvRow += tempVal + ",";
+			}else if(temp == TaxyZone.class) {
+				int tempVal = (key%10);
+				key = key/10;
+				Class<?> temp2 = keyComp[--i];
+				Object tempVal2 = temp2.getEnumConstants()[key%10-1];
+				//TODO: taxyZone.getBorough must be replaced with taxyZone.getBoroughDistName
+				keyS += tempVal2 + ",";
+				csvRow += taxyZone.getBorough(tempVal) + ",";
+			}else if(temp == Integer.class) {
+				int lengthN = (new Integer(key)).toString().length();
+				int lengthO = keyComp.length;
+				int tempVal;
+				tempVal = (int) (key%Math.pow(10, (lengthN-lengthO)+1));
+				key =  (key/(int)Math.pow(10, (lengthN-lengthO)+1));
+				Class<?> temp2 = keyComp[--i];
+				Object tempVal2 = temp2.getEnumConstants()[key%10-1];
+				keyS += tempVal2 + ",";
+				csvRow += taxyZone.getZone(tempVal) + ",";
+			}
+			key = key/10;
+		}
+		MaxValueManager maxPassengerCount = tup._2.getAs(0);
+		balance = maxPassengerCount.getBalanceTo();
+		MaxValueManager maxTrip = tup._2.getAs(1);
+		MaxValueManager maxExtra = tup._2.getAs(2);
+		MaxValueManager maxTip = tup._2.getAs(3);
+		MaxValueManager maxTotal = tup._2.getAs(4);
+		Integer passengerCounter = tup._2.getAs(5);
+		Float sumTrip = tup._2.getAs(6);
+		Float sumTip = tup._2.getAs(7);
+		Float sumTotal = tup._2.getAs(8);
+		Integer counter = tup._2.getAs(9);
+		csvRow += maxPassengerCount.toCSV();
+		csvRow += maxTrip.toCSV();
+		csvRow += maxExtra.toCSV();
+		csvRow += maxTip.toCSV();
+		csvRow += maxTotal.toCSV();
+		csvRow += ((double)passengerCounter / counter*1.0) + ",";
+		csvRow += ((double)sumTrip / counter*1.0) + ",";
+		csvRow += ((double)sumTip / counter*1.0) + ",";
+		csvRow += ((double)sumTotal / counter*1.0) + ",";
+		csvRow += counter + "\n";
+		if(header) {
+			header = false;
+			keyHeader = keyS;
+			String[] var = new String[] {"MaxPassengerCount","MaxTripDistance","MaxExtraPaid","MaxTipPaid","MaxTotalPaid"};
+			for(int j=0; j<var.length; j++) {
+				for(int i=1; i<=balance; i++) {
+					keyHeader += var[j] + "N" + i + ",freq" + var[j] + "N" + i + ",";
+				}
+			}
+			keyHeader += "AvgPassengerCounter,AvgTripDistance,AvgTipPaid,AvgTotalPaid,RowEvaluated\n";
+		}
+	}
+	return keyHeader+csvRow;
+}
 	public static void setTaxyZone(TaxyZone taxyZ) {
 		taxyZone = taxyZ;
 	}

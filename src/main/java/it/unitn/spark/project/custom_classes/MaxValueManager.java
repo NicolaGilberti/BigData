@@ -13,6 +13,7 @@ public class MaxValueManager implements Serializable{
 	private static final long serialVersionUID = 1L;
 	//attributes
 	private ArrayList<Tuple2<Float,Integer>> maxValues;
+	public int balanceTo = 3;
 	//constructors
 	public MaxValueManager(Tuple2<Float, Integer> f,Tuple2<Float, Integer> s,Tuple2<Float, Integer> t) {
 		maxValues = new ArrayList<Tuple2<Float,Integer>>(3);
@@ -67,7 +68,7 @@ public class MaxValueManager implements Serializable{
             }else if (Float.compare(arr._1, this.getThird()._1)==0){
             	this.setThird(new Tuple2<Float, Integer>(this.getThird()._1, Integer.sum(arr._2, this.getThird()._2)));
             }
-			this.balanceToX(3);
+			this.balanceToX(balanceTo);
 		}
 		return this;
 	}
@@ -93,5 +94,21 @@ public class MaxValueManager implements Serializable{
 				s += "\t[" + tmp._1 + ", " + tmp._2 + "]";
 			}
 		return s;
+	}
+	
+	public String toCSV() {
+		String s="";
+		for(int i=0; i< this.maxValues.size(); i++) {
+			Tuple2<Float, Integer> tmp = this.maxValues.get(i);
+			s += tmp._1 + "," + tmp._2 + ",";
+		}
+		return s;
+	}
+	
+	public int getBalanceTo() {
+		return balanceTo;
+	}
+	public void setBalanceTo(int balanceTo) {
+		this.balanceTo = balanceTo;
 	}
 }
