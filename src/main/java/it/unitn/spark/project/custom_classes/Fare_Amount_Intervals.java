@@ -1,12 +1,12 @@
 package it.unitn.spark.project.custom_classes;
 
-public enum Distance_Intervals {
-	ZERO_TWO(0, 2), TWO_FIVE(2, 5), FIVE_TWENTY(5, 20), TWENTY_TWOHUNDRED(20, 200), TWOHUNDRED_PLUS(200, 100000000);
+public enum Fare_Amount_Intervals {
+	ZERO_TWO(0, 2), TWO_FIVE(2, 5), FIVE_TEN(5, 10), TEN_FIFTEEN(10, 15), FIFTEEN_TWENTYFIVE(15, 25), TWENTYFIVE_FOURTY(25, 40), FOURTY_HUNDRED(40, 100), HUNDRED_THREEHUNDRED(100, 300), THREEHUNDRED_THOUSAND(300, 1000);
 	
 	private Integer startInterval;
     private Integer endInterval;
 
-    Distance_Intervals(int s, int e) {
+    Fare_Amount_Intervals(int s, int e) {
         this.startInterval = s;
         this.endInterval = e;
     }
