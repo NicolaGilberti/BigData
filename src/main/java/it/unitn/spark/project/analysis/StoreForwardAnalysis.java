@@ -1,5 +1,7 @@
 package it.unitn.spark.project.analysis;
 
+import java.text.ParseException;
+
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.Row;
@@ -16,7 +18,7 @@ public class StoreForwardAnalysis {
 		return listWithKey;
 	}
 
-	private static Tuple2<Integer,Row> mapDataForSF(Row a) {
+	private static Tuple2<Integer,Row> mapDataForSF(Row a) throws NumberFormatException, ParseException {
 		Integer key = 2;
 		Row value = null;
 		if(a.getAs("store_and_fwd_flag").equals(StoreForward.values()[0].getStatus()))

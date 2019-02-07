@@ -1,6 +1,8 @@
 package it.unitn.spark.project.analysis;
 
 
+import java.text.ParseException;
+
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.Row;
@@ -19,9 +21,11 @@ public class RateCodeAnalysis {
 	
 	/******************/
 	/**		Maps	 **/
-	/******************/
+	/**
+	 * @throws ParseException 
+	 * @throws NumberFormatException ****************/
 
-	private static Tuple2<Integer,Row> mapDataForRCID(Row a) {
+	private static Tuple2<Integer,Row> mapDataForRCID(Row a) throws NumberFormatException, ParseException {
 		Integer keyPt1 = 0;
 		Row value = null;
 		for(int i=0; i< RateCodeID.values().length; i++) {

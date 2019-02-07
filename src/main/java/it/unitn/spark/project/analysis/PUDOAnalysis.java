@@ -1,5 +1,7 @@
 package it.unitn.spark.project.analysis;
 
+import java.text.ParseException;
+
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.Row;
@@ -25,9 +27,11 @@ public class PUDOAnalysis {
 	
 	/******************/
 	/**		Maps	 **/
-	/******************/
+	/**
+	 * @throws ParseException 
+	 * @throws NumberFormatException ****************/
 	
-	private static Tuple2<Integer,Row> mapDataForPUDO(Row a) {
+	private static Tuple2<Integer,Row> mapDataForPUDO(Row a) throws NumberFormatException, ParseException {
 		Integer keyPt1 = 0;
 		Integer keyPt2 = 0;
 		Row value = null;
@@ -39,7 +43,7 @@ public class PUDOAnalysis {
 		return new Tuple2<Integer,Row>(key,value);
 	}
 	
-	private static Tuple2<Integer,Row> mapDataForSamePUDO(Row a) {
+	private static Tuple2<Integer,Row> mapDataForSamePUDO(Row a) throws NumberFormatException, ParseException {
 		Integer keyPt1 = 0;
 		Integer keyPt2 = 0;
 		Row value = null;

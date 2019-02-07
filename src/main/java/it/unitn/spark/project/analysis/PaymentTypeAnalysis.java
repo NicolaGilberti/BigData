@@ -1,5 +1,7 @@
 package it.unitn.spark.project.analysis;
 
+import java.text.ParseException;
+
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.Row;
@@ -17,10 +19,12 @@ public class PaymentTypeAnalysis {
 
 	/******************/
 	/**		Maps	 **/
-	/******************/
+	/**
+	 * @throws ParseException 
+	 * @throws NumberFormatException ****************/
 	
 	 /* @throws ParseException */
-	private static Tuple2<Integer,Row> mapDataForPaymentType(Row a) {
+	private static Tuple2<Integer,Row> mapDataForPaymentType(Row a) throws NumberFormatException, ParseException {
 		Integer key = 0;
 		Row value;
 		key = Integer.parseInt(a.getAs("payment_type"));

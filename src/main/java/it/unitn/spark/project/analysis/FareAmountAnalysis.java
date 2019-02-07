@@ -9,6 +9,7 @@ import org.apache.spark.sql.Row;
 import it.unitn.spark.project.custom_classes.Distance_Intervals;
 import it.unitn.spark.project.custom_classes.Fare_Amount_Intervals;
 import it.unitn.spark.project.custom_classes.Helper;
+import it.unitn.spark.project.custom_classes.Time_intervals;
 import scala.Tuple2;
 
 public class FareAmountAnalysis {
@@ -23,7 +24,16 @@ public class FareAmountAnalysis {
 		listWithKey = fullList.mapToPair(a -> mapDataForFADI(a));
 		return listWithKey;
 	}
-	
+	public static JavaPairRDD<Integer, Row> getValuableDataForFATI(JavaRDD<Row> fullList) {
+		JavaPairRDD<Integer,Row> listWithKey = null;
+		listWithKey = fullList.mapToPair(a -> mapDataForFATI(a));
+		return listWithKey;
+	}
+	public static JavaPairRDD<Double,Integer> getValuableDataForNFA(JavaRDD<Row> fullList) {
+		JavaPairRDD<Double,Integer> listWithKey = null;
+		listWithKey = fullList.mapToPair(a -> mapDataForNFA(a));
+		return listWithKey;
+	}
 	
 	/******************/
 	/**		Maps	 **/
@@ -33,7 +43,7 @@ public class FareAmountAnalysis {
 		Integer key =0;
 		Row value;
 		for(int i=0; i< Fare_Amount_Intervals.values().length; i++) {
-			if(inInterval(a, Fare_Amount_Intervals.values()[i])) {
+			if(Helper.inInterval(a, Fare_Amount_Intervals.values()[i])) {
 				key = i;
 			}
 		}
@@ -47,12 +57,12 @@ public class FareAmountAnalysis {
 		Integer keyPt2 = 0;
 		Row value = null;
 		for(int i=0; i< Fare_Amount_Intervals.values().length; i++) {
-			if(inInterval(a, Fare_Amount_Intervals.values()[i])) {
+			if(Helper.inInterval(a, Fare_Amount_Intervals.values()[i])) {
 				keyPt1 = i;
 			}
 		}
 		for(int i=0; i< Distance_Intervals.values().length; i++) {
-			if(inInterval(a, Distance_Intervals.values()[i])) {
+			if(Helper.inInterval(a, Distance_Intervals.values()[i])) {
 				keyPt2 = i;
 			}
 		}
@@ -62,35 +72,35 @@ public class FareAmountAnalysis {
 		return new Tuple2<Integer,Row>(key,value);
 	}
 	
+	/* @throws ParseException */
+	private static Tuple2<Integer,Row> mapDataForFATI(Row a) throws ParseException {
+		Integer keyPt1 = 0;
+		Integer keyPt2 = 0;
+		Row value = null;
+		for(int i=0; i< Fare_Amount_Intervals.values().length; i++) {
+			if(Helper.inInterval(a, Fare_Amount_Intervals.values()[i])) {
+				keyPt1 = i;
+			}
+		}
+		for(int i=0; i< Time_intervals.values().length; i++) {
+			if(Helper.inInterval(a, Time_intervals.values()[i])) {
+				keyPt2 = i;
+			}
+		}
+		String keyS = (keyPt1+1) + "" + (keyPt2+1);
+		int key = Integer.parseInt(keyS); 
+		value = Helper.getFormattedRow(a);
+		return new Tuple2<Integer,Row>(key,value);
+	}
+	private static Tuple2<Double,Integer> mapDataForNFA(Row a) {
+		Double key = 0.0;
+		key = Double.parseDouble(a.getAs("fare_amount"));
+		if(key >= 0)
+			return new Tuple2<Double,Integer>(null,null);
+		return new Tuple2<Double,Integer>(key,1);
+	}
+	
 
-	public static JavaPairRDD<Integer, Row> getAllReducedData(JavaPairRDD<Integer, Row> fullList) {
-		JavaPairRDD<Integer,Row> listWithAvg = null;
-		if(fullList.isEmpty()) {
-			throw new java.lang.RuntimeException("Empty RDD");
-		}
-		listWithAvg = fullList.reduceByKey((a,b) -> Helper.counts(a,b));
-		return listWithAvg;
-	}
 	
-	/*********************/
-	/**		Filters		**/
-	/*********************/
-	private static boolean inInterval(Row a, Fare_Amount_Intervals d) throws ParseException {
-		Float toCheck = Float.parseFloat(a.getAs("trip_distance"));
-		if(toCheck >= d.getStartInterval() && 
-				toCheck < d.getEndInterval()) {
-			return true;
-		}
-		return false;
-	}
-	
-	private static boolean inInterval(Row a, Distance_Intervals d) throws ParseException {
-		Float toCheck = Float.parseFloat(a.getAs("trip_distance"));
-		if(toCheck >= d.getStartInterval() && 
-				toCheck < d.getEndInterval()) {
-			return true;
-		}
-		return false;
-	}
 
 }
