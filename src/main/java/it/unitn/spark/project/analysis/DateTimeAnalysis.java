@@ -22,8 +22,9 @@ import scala.Tuple2;
 public class DateTimeAnalysis {
 	private static Calendar calendar = Calendar.getInstance();
 	private static TaxyZone taxyZone = null;
+	public static int counterMan=0;
 	/**
-	 * 
+	 * Time intervals
 	 * @param fullList
 	 * @return
 	 */
@@ -33,7 +34,7 @@ public class DateTimeAnalysis {
 		return listWithKey;
 	}
 	/**
-	 * 
+	 * Weekday-Weekend
 	 * @param fullList
 	 * @return
 	 */
@@ -466,6 +467,7 @@ public class DateTimeAnalysis {
 	}
 	
 	public static Tuple2<Integer,Row> mapDataForTIPT(Row a) throws ParseException{
+		boolean tmp = false;
 		Integer keyPt1 = 0;
 		Integer keyPt2 = 0;
 		Row value = null;
@@ -721,7 +723,6 @@ public class DateTimeAnalysis {
 				elem8,
 				elem9
 				);
-		
 		return res;
 	}
 	
@@ -759,11 +760,8 @@ public class DateTimeAnalysis {
 	 * 7- Float sumTip
 	 * 8- Float sumTotal
 	 * 9- Integer counter 
-	 * @param fullList
-	 * @param keyComp
-	 * @throws ClassNotFoundException 
-	 * @throws IllegalAccessException 
-	 * @throws InstantiationException 
+	 * @param fullList the RDD to print
+	 * @param keyComp to recover the correct key values
 	 */
 	public static void printDataAnalysis(JavaPairRDD<Integer,Row> fullList, Class<?> ... keyComp) {
 		Iterator<Tuple2<Integer, Row>> it= fullList.collect().iterator();
@@ -784,10 +782,8 @@ public class DateTimeAnalysis {
 					key = key/10;
 					Class<?> temp2 = keyComp[--i];
 					Object tempVal2 = temp2.getEnumConstants()[key%10-1];
-					//TODO: taxyZone.getBorough must be replaced with taxyZone.getBoroughDistName
-					keyS += tempVal2 + " " + taxyZone.getBorough(tempVal) + " ";
+					keyS += tempVal2 + " " + taxyZone.getBoroughDistName(tempVal) + " ";
 				}else if(temp == Integer.class) {
-					//TODO: tempVal can be more than 1 character....
 					int lengthN = (new Integer(key)).toString().length();
 					int lengthO = keyComp.length;
 					int tempVal;
@@ -837,11 +833,8 @@ public class DateTimeAnalysis {
  * 7- Float sumTip
  * 8- Float sumTotal
  * 9- Integer counter 
- * @param fullList
- * @param keyComp
- * @throws ClassNotFoundException 
- * @throws IllegalAccessException 
- * @throws InstantiationException 
+ * @param fullList the RDD to print
+ * @param keyComp to recover the correct key values
  */
 public static String cSVDataAnalysis(JavaPairRDD<Integer,Row> fullList, Class<?> ... keyComp) {
 	Iterator<Tuple2<Integer, Row>> it= fullList.collect().iterator();
@@ -868,9 +861,8 @@ public static String cSVDataAnalysis(JavaPairRDD<Integer,Row> fullList, Class<?>
 				key = key/10;
 				Class<?> temp2 = keyComp[--i];
 				Object tempVal2 = temp2.getEnumConstants()[key%10-1];
-				//TODO: taxyZone.getBorough must be replaced with taxyZone.getBoroughDistName
 				keyS += tempVal2 + ",";
-				csvRow += taxyZone.getBorough(tempVal) + ",";
+				csvRow += taxyZone.getBoroughDistName(tempVal) + ",";
 			}else if(temp == Integer.class) {
 				int lengthN = (new Integer(key)).toString().length();
 				int lengthO = keyComp.length;

@@ -24,8 +24,8 @@ public class MaxValueManager implements Serializable{
 	public MaxValueManager(Tuple2<Float, Integer> f) {
 		maxValues = new ArrayList<Tuple2<Float,Integer>>(3);
 		maxValues.add(f);
-		maxValues.add(new Tuple2<Float,Integer>(new Float(0),new Integer(1)));
-		maxValues.add(new Tuple2<Float,Integer>(new Float(0),new Integer(1)));
+		maxValues.add(new Tuple2<Float,Integer>(new Float(0),new Integer(0)));
+		maxValues.add(new Tuple2<Float,Integer>(new Float(0),new Integer(0)));
 	}
 	//get & set
 	public Tuple2<Float,Integer> getFirst() {
@@ -58,15 +58,15 @@ public class MaxValueManager implements Serializable{
 			if (Float.compare(arr._1, this.getFirst()._1)>0){
 				this.maxValues.add(0, arr);
             }else if (Float.compare(arr._1, this.getFirst()._1)==0){
-            	this.setFirst(new Tuple2<Float, Integer>(this.getFirst()._1, Integer.sum(arr._2, this.getFirst()._2)));
+            	this.setFirst(new Tuple2<Float, Integer>(this.getFirst()._1, (arr._2+this.getFirst()._2)));
             }else if (Float.compare(arr._1, this.getSecond()._1)>0){
 				this.maxValues.add(1, arr);
             }else if (Float.compare(arr._1, this.getSecond()._1)==0){
-            	this.setSecond(new Tuple2<Float, Integer>(this.getSecond()._1, Integer.sum(arr._2, this.getSecond()._2)));
+            	this.setSecond(new Tuple2<Float, Integer>(this.getSecond()._1, (arr._2+this.getSecond()._2)));
             }else if (Float.compare(arr._1, this.getThird()._1)>0) {
 				this.maxValues.add(2, arr);
             }else if (Float.compare(arr._1, this.getThird()._1)==0){
-            	this.setThird(new Tuple2<Float, Integer>(this.getThird()._1, Integer.sum(arr._2, this.getThird()._2)));
+            	this.setThird(new Tuple2<Float, Integer>(this.getThird()._1, (arr._2+this.getThird()._2)));
             }
 			this.balanceToX(balanceTo);
 		}
@@ -110,5 +110,10 @@ public class MaxValueManager implements Serializable{
 	}
 	public void setBalanceTo(int balanceTo) {
 		this.balanceTo = balanceTo;
+	}
+	protected Object clone() {
+		Object temp = new MaxValueManager(this.getFirst(), this.getSecond(), this.getThird());
+		return temp;
+		
 	}
 }

@@ -215,7 +215,6 @@ public class Helper {
 						}
 					}
 				}else if(temp == Integer.class) {
-					//TODO: tempVal can be more than 1 character....
 					int lengthN = (new Integer(key)).toString().length();
 					int lengthO = keyComp.length;
 					int tempVal;

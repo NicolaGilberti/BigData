@@ -2,8 +2,10 @@ package it.unitn.spark.project;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -37,6 +39,15 @@ public class Master {
 		start = System.currentTimeMillis();
 		//output dir
 		outputDir.mkdirs();
+		PrintStream o;
+		try {
+			o = new PrintStream(new File(outputDir+"/extraValuableThing_maybe.txt"));
+	        // Assign	 o to output stream 
+	        System.setOut(o); 
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} 
+        
 		// SparkSession
 		Builder builder = new Builder().appName("SparkSQL Examples");
 		//if (new File("/Users/").exists()) {
@@ -51,18 +62,16 @@ public class Master {
 
 		// Creating DataFrames
 		//Dataset<Row> df = spark.read().format("CSV").option("header", "true").load("files/yellow_tripdata_2018-01.csv")
-				//.limit(1000)
-				;
+				//.limit(1000);
 		//df.show();
 		
 		JavaRDD<Row> lines = spark.read().format("CSV")
 				.option("header", "true")
 				//.load("yellow_tripdata_2018-01.csv")
-				.load("files/yellow_tripdata_2018-01.csv")
-				.persist(StorageLevel.MEMORY_ONLY())	/* https://spark.apache.org/docs/latest/rdd-programming-guide.html#rdd-persistence */
-				.limit(10)
-				.javaRDD()
-				;
+				.load("files/yellow_tripdata_2018-01.csv","files/yellow_tripdata_2018-02.csv","files/yellow_tripdata_2018-03.csv","files/yellow_tripdata_2018-04.csv","files/yellow_tripdata_2018-05.csv","files/yellow_tripdata_2018-06.csv")
+				//.persist(StorageLevel.MEMORY_ONLY())	/* https://spark.apache.org/docs/latest/rdd-programming-guide.html#rdd-persistence */
+				//.limit(10)
+				.javaRDD();
 		JavaRDD<Row> lookUpTable = spark.read().format("CSV").option("header", "true").load("taxi _zone_lookup.csv").javaRDD();
 		TaxyZone taxyZone = new TaxyZone(lookUpTable);
 		DateTimeAnalysis.setTaxyZone(taxyZone);
@@ -75,94 +84,103 @@ public class Master {
 //		start = System.currentTimeMillis();
 //		JavaPairRDD<Integer,Row> listOfTimeIntervalsData = DateTimeAnalysis.getValuableDataForTimeIntervals(lines);
 //		JavaPairRDD<Integer,Row> reducedListOfTimeIntervalsData = DateTimeAnalysis.getAllReducedData(listOfTimeIntervalsData);
+//		//DateTimeAnalysis.printDataAnalysis(reducedListOfTimeIntervalsData, Time_intervals.class);
 //		str = DateTimeAnalysis.cSVDataAnalysis(reducedListOfTimeIntervalsData, Time_intervals.class);
 //		end = System.currentTimeMillis();
-//		System.out.println(getStringTime(start,end));
+//		//System.out.println(getStringTime(start,end));
 //	    printToCSV(str, "TimeIntervals.csv");
 ////		
 //		start = System.currentTimeMillis();
 //		JavaPairRDD<Integer,Row> listOfWeekendWeekdaysData = DateTimeAnalysis.getValuableDataForWeekendWeekdays(lines);
 //		JavaPairRDD<Integer,Row> reducedListOfWeekendWeekdaysData = DateTimeAnalysis.getAllReducedData(listOfWeekendWeekdaysData);
+//		//DateTimeAnalysis.printDataAnalysis(reducedListOfWeekendWeekdaysData, DayOfWeek.class);
 //		str = DateTimeAnalysis.cSVDataAnalysis(reducedListOfWeekendWeekdaysData, DayOfWeek.class);
 //		end = System.currentTimeMillis();
-//		System.out.println(getStringTime(start,end));
+//		//System.out.println(getStringTime(start,end));
 //	    printToCSV(str, "WeekendWeekday.csv");
 ////		
 //		start = System.currentTimeMillis();
 //		JavaPairRDD<Integer,Row> listOfWWTIData = DateTimeAnalysis.getValuableDataForWWTI(lines);
 //		JavaPairRDD<Integer,Row> reducedListOfWWTIData = DateTimeAnalysis.getAllReducedData(listOfWWTIData);
+//		//DateTimeAnalysis.printDataAnalysis(reducedListOfWWTIData, DayOfWeek.class, Time_intervals.class);
 //		str = DateTimeAnalysis.cSVDataAnalysis(reducedListOfWWTIData, DayOfWeek.class, Time_intervals.class);
 //		end = System.currentTimeMillis();
-//		System.out.println(getStringTime(start,end));
+//		//System.out.println(getStringTime(start,end));
 //	    printToCSV(str, "WeekendWeekdayTimeIntervals.csv");
 ////		
 //		start = System.currentTimeMillis();
 //		JavaPairRDD<Integer,Row> listOfTIPTData = DateTimeAnalysis.getValuableDataForTIPT(lines);
 //		JavaPairRDD<Integer,Row> reducedListOfTIPTData = DateTimeAnalysis.getAllReducedData(listOfTIPTData);
+//		//DateTimeAnalysis.printDataAnalysis(reducedListOfTIPTData, Time_intervals.class, Payment_type.class);
 //		str = DateTimeAnalysis.cSVDataAnalysis(reducedListOfTIPTData, Time_intervals.class, Payment_type.class);
 //		end = System.currentTimeMillis();
-//		System.out.println(getStringTime(start,end));
+//		//System.out.println(getStringTime(start,end));
 //	    printToCSV(str, "TimeIntervalsPaymentType.csv");
 ////		
 //		start = System.currentTimeMillis();
 //		JavaPairRDD<Integer,Row> listOfWWPTData = DateTimeAnalysis.getValuableDataForWWPT(lines);
 //		JavaPairRDD<Integer,Row> reducedListOfWWPTData = DateTimeAnalysis.getAllReducedData(listOfWWPTData);
+//		//DateTimeAnalysis.printDataAnalysis(reducedListOfWWPTData, DayOfWeek.class, Payment_type.class);
 //		str = DateTimeAnalysis.cSVDataAnalysis(reducedListOfWWPTData, DayOfWeek.class, Payment_type.class);
 //		end = System.currentTimeMillis();
-//		System.out.println(getStringTime(start,end));
+//		//System.out.println(getStringTime(start,end));
 //	    printToCSV(str, "WeekendWeekdayPaymentType.csv");
 ////		
 //		start = System.currentTimeMillis();
 //		JavaPairRDD<Integer,Row> listOfWWTIPTData = DateTimeAnalysis.getValuableDataForWWTIPT(lines);
 //		JavaPairRDD<Integer,Row> reducedListOfWWTIPTData = DateTimeAnalysis.getAllReducedData(listOfWWTIPTData);
+//		//DateTimeAnalysis.printDataAnalysis(reducedListOfWWTIPTData, DayOfWeek.class, Time_intervals.class, Payment_type.class);
 //		str = DateTimeAnalysis.cSVDataAnalysis(reducedListOfWWTIPTData, DayOfWeek.class, Time_intervals.class, Payment_type.class);
 //		end = System.currentTimeMillis();
-//		System.out.println(getStringTime(start,end));
+//		//System.out.println(getStringTime(start,end));
 //	    printToCSV(str, "WeekendWeekdayTimeIntervalsPaymentType.csv");
 ////		
 //		start = System.currentTimeMillis();
 //		JavaPairRDD<Integer,Row> listOfTIBData = DateTimeAnalysis.getValuableDataForTIB(lines);
 //		JavaPairRDD<Integer,Row> reducedListOfTIBData = DateTimeAnalysis.getAllReducedData(listOfTIBData);
+//		//DateTimeAnalysis.printDataAnalysis(reducedListOfTIBData, Time_intervals.class, Boolean.class);
 //		str = DateTimeAnalysis.cSVDataAnalysis(reducedListOfTIBData, Time_intervals.class, Boolean.class);
 //		end = System.currentTimeMillis();
-//		System.out.println(getStringTime(start,end));
+//		//System.out.println(getStringTime(start,end));
 //	    printToCSV(str, "TimeIntervalsBorough.csv");
 ////
 //		start = System.currentTimeMillis();
 //		JavaPairRDD<Integer,Row> listOfTIPUData = DateTimeAnalysis.getValuableDataForTIPU(lines);
 //		JavaPairRDD<Integer,Row> reducedListOfTIPUData = DateTimeAnalysis.getAllReducedData(listOfTIPUData);
+//		//DateTimeAnalysis.printDataAnalysis(reducedListOfTIPUData, Time_intervals.class, FromTo.class, Integer.class);
 //		str = DateTimeAnalysis.cSVDataAnalysis(reducedListOfTIPUData, Time_intervals.class, FromTo.class, Integer.class);
 //		end = System.currentTimeMillis();
-//		System.out.println(getStringTime(start,end));
+//		//System.out.println(getStringTime(start,end));
 //	    printToCSV(str, "TimeIntervalsPickUpBorough.csv");
 ////
 //		start = System.currentTimeMillis();
 //		JavaPairRDD<Integer,Row> listOfTIPUBData = DateTimeAnalysis.getValuableDataForTIPUB(lines);
 //		JavaPairRDD<Integer,Row> reducedListOfTIPUBData = DateTimeAnalysis.getAllReducedData(listOfTIPUBData);
+//		//DateTimeAnalysis.printDataAnalysis(reducedListOfTIPUBData, Time_intervals.class, FromTo.class, TaxyZone.class);
 //		str = DateTimeAnalysis.cSVDataAnalysis(reducedListOfTIPUBData, Time_intervals.class, FromTo.class, TaxyZone.class);
 //		end = System.currentTimeMillis();
-//		System.out.println(getStringTime(start,end));
+//		//System.out.println(getStringTime(start,end));
 //	    printToCSV(str, "TimeIntervalsPickUpBorough.csv");
-//		
+////		
 //		start = System.currentTimeMillis();
 //		JavaPairRDD<Integer,Row> listOfWWPUBData = DateTimeAnalysis.getValuableDataForWWPUB(lines);
 //		JavaPairRDD<Integer,Row> reducedListOfWWPUBData = DateTimeAnalysis.getAllReducedData(listOfWWPUBData);
 //		//DateTimeAnalysis.printDataAnalysis(reducedListOfWWPUBData, DayOfWeek.class, FromTo.class, TaxyZone.class);
-//		String str = DateTimeAnalysis.cSVDataAnalysis(reducedListOfWWPUBData, DayOfWeek.class, FromTo.class, TaxyZone.class);
+//		str = DateTimeAnalysis.cSVDataAnalysis(reducedListOfWWPUBData, DayOfWeek.class, FromTo.class, TaxyZone.class);
 //		end = System.currentTimeMillis();
-//		System.out.println(getStringTime(start,end));
+//		//System.out.println(getStringTime(start,end));
 //	    printToCSV(str, "WeekendWeekdayPickUpBorough.csv");
-		
-		/**************************/
-		/**Trip Distance analysis**/
-		/**************************/
+//		
+//		/**************************/
+//		/**Trip Distance analysis**/
+//		/**************************/
 //		start = System.currentTimeMillis();
 //		JavaPairRDD<Integer,Row> listOfDistanceIntervalsData = DistanceAnalysis.getValuableDataForDistanceIntervals(lines);
 //		JavaPairRDD<Integer,Row> reducedListOfDistanceIntervalsData = DistanceAnalysis.getAllReducedData(listOfDistanceIntervalsData);
 //		//Helper.printDataAnalysis(reducedListOfDistanceIntervalsData, Distance_Intervals.class);
 //		str = Helper.cSVDataAnalysis(reducedListOfDistanceIntervalsData, Distance_Intervals.class);
 //		end = System.currentTimeMillis();
-//		System.out.println(getStringTime(start,end));
+//		//System.out.println(getStringTime(start,end));
 //		printToCSV(str, "Distance_Intervals.csv");
 //		
 //		//Distance Analysis for different distance intervals wrt recordId
@@ -172,7 +190,7 @@ public class Master {
 //		//Helper.printDataAnalysis(reducedListOfDIRIDData, Distance_Intervals.class, RateCodeID.class);
 //		str = Helper.cSVDataAnalysis(reducedListOfDIRIDData, Distance_Intervals.class, RateCodeID.class);
 //		end = System.currentTimeMillis();
-//		System.out.println(getStringTime(start,end));
+//		//System.out.println(getStringTime(start,end));
 //		printToCSV(str, "DistanceIntervalsRateCodeID.csv");
 //		
 //		/*************************/
@@ -184,7 +202,7 @@ public class Master {
 //		//Helper.printDataAnalysis(reducedListOfPUDOData, TaxyZone.class, TaxyZone.class);
 //		str = Helper.cSVDataAnalysis(reducedListOfPUDOData, TaxyZone.class, TaxyZone.class);
 //		end = System.currentTimeMillis();
-//		System.out.println(getStringTime(start,end));
+//		//System.out.println(getStringTime(start,end));
 //		printToCSV(str, "PickUpDropOff.csv");
 ////		
 //		start = System.currentTimeMillis();
@@ -193,7 +211,7 @@ public class Master {
 //		//Helper.printDataAnalysis(reducedListOfSamePUDOData, TaxyZone.class, TaxyZone.class);
 //		str = Helper.cSVDataAnalysis(reducedListOfSamePUDOData, TaxyZone.class, TaxyZone.class);
 //		end = System.currentTimeMillis();
-//		System.out.println(getStringTime(start,end));
+//		//System.out.println(getStringTime(start,end));
 //		printToCSV(str, "PickUpDropOff.csv");
 //		
 //		/*************************/
@@ -205,7 +223,7 @@ public class Master {
 //		//Helper.printDataAnalysis(reducedListOfRCIDData, RateCodeID.class);
 //		str = Helper.cSVDataAnalysis(reducedListOfRCIDData, RateCodeID.class);
 //		end = System.currentTimeMillis();
-//		System.out.println(getStringTime(start,end));
+//		//System.out.println(getStringTime(start,end));
 //		printToCSV(str, "RateCodeID.csv");
 //		
 //		/*********************************/
@@ -217,7 +235,7 @@ public class Master {
 //		//Helper.printDataAnalysis(reducedListOfSFData, StoreForward.class);
 //		str = Helper.cSVDataAnalysis(reducedListOfSFData, StoreForward.class);
 //		end = System.currentTimeMillis();
-//		System.out.println(getStringTime(start,end));
+//		//System.out.println(getStringTime(start,end));
 //		printToCSV(str, "StoreForward.csv");
 //		
 //		/*****************************/
@@ -229,7 +247,7 @@ public class Master {
 //		//Helper.printDataAnalysis(reducedListOfPTData, Payment_type.class);
 //		str = Helper.cSVDataAnalysis(reducedListOfPTData, Payment_type.class);
 //		end = System.currentTimeMillis();
-//		System.out.println(getStringTime(start,end));
+//		//System.out.println(getStringTime(start,end));
 //	    printToCSV(str, "PaymentType.csv");
 //		
 //		/*****************************/
@@ -241,7 +259,7 @@ public class Master {
 //		//Helper.printDataAnalysis(reducedListOfFAData, Fare_Amount_Intervals.class);
 //		str = Helper.cSVDataAnalysis(reducedListOfFAData, Fare_Amount_Intervals.class);
 //		end = System.currentTimeMillis();
-//		System.out.println(getStringTime(start,end));
+//		//System.out.println(getStringTime(start,end));
 //	    printToCSV(str, "FareIntervals.csv");
 //		
 //		start = System.currentTimeMillis();
@@ -250,7 +268,7 @@ public class Master {
 //		str = Helper.cSVDataAnalysis(reducedListOfFADIData, Fare_Amount_Intervals.class, Distance_Intervals.class);
 //		//Helper.printDataAnalysis(reducedListOfFADIData, Fare_Amount_Intervals.class, Distance_Intervals.class);
 //		end = System.currentTimeMillis();
-//		System.out.println(getStringTime(start,end));
+//		//System.out.println(getStringTime(start,end));
 //	    printToCSV(str, "FareIntervalDistanceInterval.csv");
 //		
 //		start = System.currentTimeMillis();
@@ -259,97 +277,97 @@ public class Master {
 //		str = Helper.cSVDataAnalysis(reducedListOfFATIData, Fare_Amount_Intervals.class, Time_intervals.class);
 //		//Helper.printDataAnalysis(reducedListOfFATIData, Fare_Amount_Intervals.class, Time_intervals.class);
 //		end = System.currentTimeMillis();
-//		System.out.println(getStringTime(start,end));
+//		//System.out.println(getStringTime(start,end));
 //	    printToCSV(str, "FareIntervalTimeInterval.csv");
 //		
-//		start = System.currentTimeMillis();
-//		JavaPairRDD<Double,Integer> listOfNFAData = FareAmountAnalysis.getValuableDataForNFA(lines);
-//		long countTotal = listOfNFAData.count();
-//		long countNeg = listOfNFAData.filter(a-> (a._1!=null && a._2!=null)).count();
-//		System.out.println("negitive transections: "+ countNeg);
-//		System.out.println("total transections: "+ countTotal);
-//		end = System.currentTimeMillis();
-//		System.out.println(getStringTime(start,end));
-//		
-//		/*************************/
-//		/**	Vender ID Analysis	**/
-//		/*************************/
-//		
-//		start = System.currentTimeMillis();
-//		JavaPairRDD<Integer,Row> listOfVIDData = VenderIDAnalysis.getValuableDataForVID(lines);
-//		JavaPairRDD<Integer,Row> reducedListOfVIDData = Helper.getAllReducedData(listOfVIDData);
-//		str = Helper.cSVDataAnalysis(reducedListOfVIDData, VenderID.class);
-//		//Helper.printDataAnalysis(reducedListOfVIDData, VenderID.class);
-//		end = System.currentTimeMillis();
-//		System.out.println(getStringTime(start,end));
-//	    printToCSV(str, "Vender.csv");
-//		
-//		start = System.currentTimeMillis();
-//		JavaPairRDD<Integer,Row> listOfVIDDIData = VenderIDAnalysis.getValuableDataForVIDDI(lines);
-//		JavaPairRDD<Integer,Row> reducedListOfVIDDIData = Helper.getAllReducedData(listOfVIDDIData);
-//		str = Helper.cSVDataAnalysis(reducedListOfVIDDIData, VenderID.class, Distance_Intervals.class);
-//		//Helper.printDataAnalysis(reducedListOfVIDDIData, VenderID.class, Distance_Intervals.class);
-//		end = System.currentTimeMillis();
-//		System.out.println(getStringTime(start,end));
-//	    printToCSV(str, "VenderDistanceIntervals.csv");
-//		
-//		start = System.currentTimeMillis();
-//		JavaPairRDD<Integer,Row> listOfVIDTIData = VenderIDAnalysis.getValuableDataForVIDTI(lines);
-//		JavaPairRDD<Integer,Row> reducedListOfVIDTIData = Helper.getAllReducedData(listOfVIDTIData);
-//		str = Helper.cSVDataAnalysis(reducedListOfVIDTIData, VenderID.class, Time_intervals.class);
-//		//Helper.printDataAnalysis(reducedListOfVIDTIData, VenderID.class, Time_intervals.class);
-//		end = System.currentTimeMillis();
-//		System.out.println(getStringTime(start,end));
-//	    printToCSV(str, "VenderTimeIntervals.csv");
-//		
-//		start = System.currentTimeMillis();
-//		JavaPairRDD<Integer,Row> listOfVIDPUData = VenderIDAnalysis.getValuableDataForVIDPU(lines);
-//		JavaPairRDD<Integer,Row> reducedListOfVIDPUData = Helper.getAllReducedData(listOfVIDPUData);
-//		str = Helper.cSVDataAnalysis(reducedListOfVIDPUData, VenderID.class, TaxyZone.class);
-//		//Helper.printDataAnalysis(reducedListOfVIDPUData, VenderID.class, TaxyZone.class);
-//		end = System.currentTimeMillis();
-//		System.out.println(getStringTime(start,end));
-//	    printToCSV(str, "VenderPickupZone.csv");
-//		
-//		start = System.currentTimeMillis();
-//		JavaPairRDD<Integer,Row> listOfVIDDOData = VenderIDAnalysis.getValuableDataForVIDDO(lines);
-//		JavaPairRDD<Integer,Row> reducedListOfVIDDOData = Helper.getAllReducedData(listOfVIDDOData);
-//		str = Helper.cSVDataAnalysis(reducedListOfVIDDOData, VenderID.class, TaxyZone.class);
-//		//Helper.printDataAnalysis(reducedListOfVIDDOData, VenderID.class, TaxyZone.class);
-//		end = System.currentTimeMillis();
-//		System.out.println(getStringTime(start,end));
-//	    printToCSV(str, "VenderDropeOffZone.csv");
-//		
-//		start = System.currentTimeMillis();
-//		JavaPairRDD<Integer,Row> listOfVIDPTData = VenderIDAnalysis.getValuableDataForVIDPT(lines);
-//		JavaPairRDD<Integer,Row> reducedListOfVIDPTData = Helper.getAllReducedData(listOfVIDPTData);
-//		str = Helper.cSVDataAnalysis(reducedListOfVIDPTData, VenderID.class, Payment_type.class);
-//		//Helper.printDataAnalysis(reducedListOfVIDPTData, VenderID.class, Payment_type.class);
-//		end = System.currentTimeMillis();
-//		System.out.println(getStringTime(start,end));
-//	    printToCSV(str, "VenderPaymentType.csv");
-//		
-//		start = System.currentTimeMillis();
-//		JavaPairRDD<Integer,Row> listOfVIDSFData = VenderIDAnalysis.getValuableDataForVIDSF(lines);
-//		JavaPairRDD<Integer,Row> reducedListOfVIDSFData = Helper.getAllReducedData(listOfVIDSFData);
-//		str = Helper.cSVDataAnalysis(reducedListOfVIDSFData, VenderID.class, StoreForward.class);
-//		//Helper.printDataAnalysis(reducedListOfVIDSFData, VenderID.class, StoreForward.class);
-//		end = System.currentTimeMillis();
-//		System.out.println(getStringTime(start,end));
-//	    printToCSV(str, "VenderStoreForward.csv");
-//		
-//		start = System.currentTimeMillis();
-//		JavaPairRDD<Integer,Row> listOfVIDWDData = VenderIDAnalysis.getValuableDataForVIDWD(lines);
-//		JavaPairRDD<Integer,Row> reducedListOfVIDWDData = Helper.getAllReducedData(listOfVIDWDData);
-//		str = Helper.cSVDataAnalysis(reducedListOfVIDWDData, VenderID.class, DayOfWeek.class);
-//		//Helper.printDataAnalysis(reducedListOfVIDWDData, VenderID.class, DayOfWeek.class);
-//		end = System.currentTimeMillis();
-//		System.out.println(getStringTime(start,end));
-//	    printToCSV(str, "VenderDayOfWeek.csv");
+		start = System.currentTimeMillis();
+		JavaPairRDD<Double,Integer> listOfNFAData = FareAmountAnalysis.getValuableDataForNFA(lines);
+		long countTotal = listOfNFAData.count();
+		long countNeg = listOfNFAData.filter(a-> (a._1!=null && a._2!=null)).count();
+		System.out.println("negitive transections: "+ countNeg);
+		System.out.println("total transections: "+ countTotal);
+		end = System.currentTimeMillis();
+		//System.out.println(getStringTime(start,end));
+		
+		/*************************/
+		/**	Vender ID Analysis	**/
+		/*************************/
+		
+		start = System.currentTimeMillis();
+		JavaPairRDD<Integer,Row> listOfVIDData = VenderIDAnalysis.getValuableDataForVID(lines);
+		JavaPairRDD<Integer,Row> reducedListOfVIDData = Helper.getAllReducedData(listOfVIDData);
+		str = Helper.cSVDataAnalysis(reducedListOfVIDData, VenderID.class);
+		//Helper.printDataAnalysis(reducedListOfVIDData, VenderID.class);
+		end = System.currentTimeMillis();
+		//System.out.println(getStringTime(start,end));
+	    printToCSV(str, "Vender.csv");
+		
+		start = System.currentTimeMillis();
+		JavaPairRDD<Integer,Row> listOfVIDDIData = VenderIDAnalysis.getValuableDataForVIDDI(lines);
+		JavaPairRDD<Integer,Row> reducedListOfVIDDIData = Helper.getAllReducedData(listOfVIDDIData);
+		str = Helper.cSVDataAnalysis(reducedListOfVIDDIData, VenderID.class, Distance_Intervals.class);
+		//Helper.printDataAnalysis(reducedListOfVIDDIData, VenderID.class, Distance_Intervals.class);
+		end = System.currentTimeMillis();
+		//System.out.println(getStringTime(start,end));
+	    printToCSV(str, "VenderDistanceIntervals.csv");
+		
+		start = System.currentTimeMillis();
+		JavaPairRDD<Integer,Row> listOfVIDTIData = VenderIDAnalysis.getValuableDataForVIDTI(lines);
+		JavaPairRDD<Integer,Row> reducedListOfVIDTIData = Helper.getAllReducedData(listOfVIDTIData);
+		str = Helper.cSVDataAnalysis(reducedListOfVIDTIData, VenderID.class, Time_intervals.class);
+		//Helper.printDataAnalysis(reducedListOfVIDTIData, VenderID.class, Time_intervals.class);
+		end = System.currentTimeMillis();
+		//System.out.println(getStringTime(start,end));
+	    printToCSV(str, "VenderTimeIntervals.csv");
+		
+		start = System.currentTimeMillis();
+		JavaPairRDD<Integer,Row> listOfVIDPUData = VenderIDAnalysis.getValuableDataForVIDPU(lines);
+		JavaPairRDD<Integer,Row> reducedListOfVIDPUData = Helper.getAllReducedData(listOfVIDPUData);
+		str = Helper.cSVDataAnalysis(reducedListOfVIDPUData, VenderID.class, TaxyZone.class);
+		//Helper.printDataAnalysis(reducedListOfVIDPUData, VenderID.class, TaxyZone.class);
+		end = System.currentTimeMillis();
+		//System.out.println(getStringTime(start,end));
+	    printToCSV(str, "VenderPickupZone.csv");
+		
+		start = System.currentTimeMillis();
+		JavaPairRDD<Integer,Row> listOfVIDDOData = VenderIDAnalysis.getValuableDataForVIDDO(lines);
+		JavaPairRDD<Integer,Row> reducedListOfVIDDOData = Helper.getAllReducedData(listOfVIDDOData);
+		str = Helper.cSVDataAnalysis(reducedListOfVIDDOData, VenderID.class, TaxyZone.class);
+		//Helper.printDataAnalysis(reducedListOfVIDDOData, VenderID.class, TaxyZone.class);
+		end = System.currentTimeMillis();
+		//System.out.println(getStringTime(start,end));
+	    printToCSV(str, "VenderDropeOffZone.csv");
+		
+		start = System.currentTimeMillis();
+		JavaPairRDD<Integer,Row> listOfVIDPTData = VenderIDAnalysis.getValuableDataForVIDPT(lines);
+		JavaPairRDD<Integer,Row> reducedListOfVIDPTData = Helper.getAllReducedData(listOfVIDPTData);
+		str = Helper.cSVDataAnalysis(reducedListOfVIDPTData, VenderID.class, Payment_type.class);
+		//Helper.printDataAnalysis(reducedListOfVIDPTData, VenderID.class, Payment_type.class);
+		end = System.currentTimeMillis();
+		//System.out.println(getStringTime(start,end));
+	    printToCSV(str, "VenderPaymentType.csv");
+		
+		start = System.currentTimeMillis();
+		JavaPairRDD<Integer,Row> listOfVIDSFData = VenderIDAnalysis.getValuableDataForVIDSF(lines);
+		JavaPairRDD<Integer,Row> reducedListOfVIDSFData = Helper.getAllReducedData(listOfVIDSFData);
+		str = Helper.cSVDataAnalysis(reducedListOfVIDSFData, VenderID.class, StoreForward.class);
+		//Helper.printDataAnalysis(reducedListOfVIDSFData, VenderID.class, StoreForward.class);
+		end = System.currentTimeMillis();
+		//System.out.println(getStringTime(start,end));
+	    printToCSV(str, "VenderStoreForward.csv");
+		
+		start = System.currentTimeMillis();
+		JavaPairRDD<Integer,Row> listOfVIDWDData = VenderIDAnalysis.getValuableDataForVIDWD(lines);
+		JavaPairRDD<Integer,Row> reducedListOfVIDWDData = Helper.getAllReducedData(listOfVIDWDData);
+		str = Helper.cSVDataAnalysis(reducedListOfVIDWDData, VenderID.class, DayOfWeek.class);
+		//Helper.printDataAnalysis(reducedListOfVIDWDData, VenderID.class, DayOfWeek.class);
+		end = System.currentTimeMillis();
+		//System.out.println(getStringTime(start,end));
+	    printToCSV(str, "VenderDayOfWeek.csv");
 		
 		
 		
-		//System.out.println(taxyZone.boroughString());
+		System.out.println(taxyZone.boroughString());
 		/** trials **/
 //		Iterator it= _.collect().iterator();
 //		while(it.hasNext()) {
