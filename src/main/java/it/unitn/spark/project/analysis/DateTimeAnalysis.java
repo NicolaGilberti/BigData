@@ -2,7 +2,6 @@ package it.unitn.spark.project.analysis;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
@@ -467,7 +466,7 @@ public class DateTimeAnalysis {
 	}
 	
 	public static Tuple2<Integer,Row> mapDataForTIPT(Row a) throws ParseException{
-		boolean tmp = false;
+		//boolean tmp = false;
 		Integer keyPt1 = 0;
 		Integer keyPt2 = 0;
 		Row value = null;
